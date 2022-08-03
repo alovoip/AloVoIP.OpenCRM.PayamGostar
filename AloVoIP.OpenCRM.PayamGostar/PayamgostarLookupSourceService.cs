@@ -22,17 +22,17 @@ namespace AloVoIP.OpenCRM.PayamGostar
 {
     public class PayamgostarLookupSourceService : PayamGostarCallStoreService, ILookupSourceService
     {
-        int lookupSourceId;
+        string lookupSourceId;
         string lookupSourceHost;
         string lookupSourceUsername;
         string lookupSourcePassword;
-        public PayamgostarLookupSourceService(int id, string host, string username, string password)
-            : base(id.ToString(), host, username, password)
+        public PayamgostarLookupSourceService(string lookupSourceId, string host, string username, string password)
+            : base(lookupSourceId, host, username, password)
         {
-            lookupSourceId = id;
-            lookupSourceHost = host;
-            lookupSourceUsername = username;
-            lookupSourcePassword = password;
+            this.lookupSourceId = lookupSourceId;
+            this.lookupSourceHost = host;
+            this.lookupSourceUsername = username;
+            this.lookupSourcePassword = password;
         }
 
         public ICrmObjectTypeChannel CreateCrmObjectTypeClient()

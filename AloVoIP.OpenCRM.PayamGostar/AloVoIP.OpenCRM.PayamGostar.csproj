@@ -2,7 +2,22 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
+		<Company>AloVoIP</Company>
+		<Authors>AloVoIP</Authors>
+		<Owners>AloVoIP</Owners>
+		<Version>1.0.1</Version>
+		<AssemblyVersion>1.0.1</AssemblyVersion>
+		<FileVersion>1.0.1</FileVersion>
+		<RepositoryUrl>https://github.com/alovoip/AloVoIP.OpenCRM.PayamGostar</RepositoryUrl>
+		<Description>The implementation of AloVoIP.OpenCRM contracts for PayamGostar CRM</Description>
 	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<OutputPath>..\.nuget\Publish\</OutputPath>
+	</PropertyGroup>
+
 
 	<ItemGroup>
 		<PackageReference Include="AloVoIP.OpenCRM" Version="1.0.0" />
