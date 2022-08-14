@@ -5,7 +5,7 @@
   },
   "projects": {
     "E:\\Code\\PayamDarabi\\AloVoIP.OpenCRM.PayamGostar\\AloVoIP.OpenCRM.PayamGostar\\AloVoIP.OpenCRM.PayamGostar.csproj": {
-      "version": "1.0.1",
+      "version": "1.0.2",
       "restore": {
         "projectUniqueName": "E:\\Code\\PayamDarabi\\AloVoIP.OpenCRM.PayamGostar\\AloVoIP.OpenCRM.PayamGostar\\AloVoIP.OpenCRM.PayamGostar.csproj",
         "projectName": "AloVoIP.OpenCRM.PayamGostar",
@@ -47,7 +47,7 @@
           "dependencies": {
             "AloVoIP.OpenCRM": {
               "target": "Package",
-              "version": "[1.0.0, )"
+              "version": "[1.1.2, )"
             },
             "NETStandard.Library": {
               "suppressParent": "All",
@@ -86,11 +86,12 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }

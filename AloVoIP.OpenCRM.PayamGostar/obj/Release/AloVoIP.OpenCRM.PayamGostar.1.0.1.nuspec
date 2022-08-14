@@ -10,7 +10,7 @@
     <repository url="https://github.com/alovoip/AloVoIP.OpenCRM.PayamGostar" />
     <dependencies>
       <group targetFramework=".NETStandard2.0">
-        <dependency id="AloVoIP.OpenCRM" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="AloVoIP.OpenCRM" version="1.1.2" exclude="Build,Analyzers" />
         <dependency id="Septa.NetStandard.PayamGostarApiClient" version="1.0.2" exclude="Build,Analyzers" />
         <dependency id="Serilog" version="2.11.0" exclude="Build,Analyzers" />
         <dependency id="System.ServiceModel.Duplex" version="4.9.0" exclude="Build,Analyzers" />

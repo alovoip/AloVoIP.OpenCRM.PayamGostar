@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "zxCTFpi4SgPFuo9tE2DYrGrxw+Q8TTJTzixSUIzV5ZKAUPisdFYRTYvL/kBb71rLgFwHK+keRS3a6mfcxcS/VQ==",
+  "dgSpecHash": "zmGayuLiZPEiQehNJBhkf1XY8PxycLZG3vlDW8nGFJHAmY+XLmcP7z7X/YeMPO9t2ysxJpGzwapL77ixxW8f9Q==",
   "success": true,
   "projectFilePath": "E:\\Code\\PayamDarabi\\AloVoIP.OpenCRM.PayamGostar\\AloVoIP.OpenCRM.PayamGostar\\AloVoIP.OpenCRM.PayamGostar.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\p.darabi\\.nuget\\packages\\alovoip.opencrm\\1.0.0\\alovoip.opencrm.1.0.0.nupkg.sha512",
+    "C:\\Users\\p.darabi\\.nuget\\packages\\alovoip.opencrm\\1.1.2\\alovoip.opencrm.1.1.2.nupkg.sha512",
     "C:\\Users\\p.darabi\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\5.0.0\\microsoft.bcl.asyncinterfaces.5.0.0.nupkg.sha512",
     "C:\\Users\\p.darabi\\.nuget\\packages\\microsoft.extensions.objectpool\\5.0.10\\microsoft.extensions.objectpool.5.0.10.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",

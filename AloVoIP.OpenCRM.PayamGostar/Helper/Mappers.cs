@@ -1,4 +1,5 @@
-﻿using AloVoIP.OpenCRM.Dto;
+﻿using AloVoIP.OpenCRM.Requests;
+using AloVoIP.OpenCRM.Responses;
 using PgCrmObjectTypeService;
 using PgIdentityService;
 using PgUserService;
@@ -12,9 +13,9 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
 {
     public static class Mappers
     {
-        public static IdentityDto ToDto(this IdentityInfo identityInfo)
+        public static IdentityResponse ToDto(this IdentityInfo identityInfo)
         {
-            var toReturn = new IdentityDto()
+            var toReturn = new IdentityResponse()
             {
                 Balance = identityInfo.Balance,
                 Classification = identityInfo.Classification,
@@ -35,7 +36,7 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
                 SupportUsername = identityInfo.SupportUsername,
                 Website = identityInfo.Website,
                 CreateDate = identityInfo.CreatDate,
-                CrmId = identityInfo.CrmId.ToStringSafe(),
+                Id = identityInfo.CrmId.ToStringSafe(),
                 CrmObjectTypeCode = identityInfo.CrmObjectTypeCode,
                 CrmObjectTypeIndex = identityInfo.CrmObjectTypeIndex,
                 CrmObjectTypeName = identityInfo.CrmObjectTypeName,
@@ -48,9 +49,9 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
             };
             return toReturn;
         }
-        public static IdentityContactAddressDto ToDto(this IdentityContactAddress identityContactAddress)
+        public static IdentityContactAddressResponse ToDto(this IdentityContactAddress identityContactAddress)
         {
-            var toReturn = new IdentityContactAddressDto
+            var toReturn = new IdentityContactAddressResponse
             {
                 Id = identityContactAddress.Id.ToString(),
                 RefId = identityContactAddress.RefId,
@@ -67,9 +68,9 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
             };
             return toReturn;
         }
-        public static CategoryInfoDto ToDto(this CategoryInfo categoryInfo)
+        public static CategoryInfoResponse ToDto(this CategoryInfo categoryInfo)
         {
-            var toReturn = new CategoryInfoDto
+            var toReturn = new CategoryInfoResponse
             {
                 Id = categoryInfo.Id.ToString(),
                 IdentityId = categoryInfo.IdentityId.ToString(),
@@ -80,22 +81,23 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
             };
             return toReturn;
         }
-        public static BaseCrmObjectExtendedPropertyDto ToDto(this BaseCrmObjectExtendedPropertyInfo baseCrmObjectExtendedPropertyInfo)
+        public static CrmObjectExtendedPropertyResponse ToDto(this BaseCrmObjectExtendedPropertyInfo categoryInfo)
         {
-            var toReturn = new BaseCrmObjectExtendedPropertyDto
+            var toReturn = new CrmObjectExtendedPropertyResponse
             {
-                Key = baseCrmObjectExtendedPropertyInfo.UserKey,
-                Name = baseCrmObjectExtendedPropertyInfo.Name,
-                Value = baseCrmObjectExtendedPropertyInfo.Value,
+                Key = categoryInfo.UserKey,
+                Name = categoryInfo.Name,
+                Value = categoryInfo.Value
             };
             return toReturn;
         }
-        public static IdentityContactPhoneDto ToDto(this IdentityContactPhone identityContactPhone)
+
+        public static IdentityContactPhoneResponse ToDto(this IdentityContactPhone identityContactPhone)
         {
-            var toReturn = new IdentityContactPhoneDto
+            var toReturn = new IdentityContactPhoneResponse
             {
                 Id = identityContactPhone.Id.ToString(),
-                RefId=identityContactPhone.RefId,
+                RefId = identityContactPhone.RefId,
                 IsDefault = identityContactPhone.IsDefault,
                 IsDeleted = identityContactPhone.IsDeleted,
                 ContinuedNumber = identityContactPhone.ContinuedNumber,
@@ -105,9 +107,9 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
             };
             return toReturn;
         }
-        public static UserDto ToDto(this UserInfo userInfo)
+        public static UserResponse ToDto(this UserInfo userInfo)
         {
-            var toReturn = new UserDto()
+            var toReturn = new UserResponse()
             {
                 Id = userInfo.Id.ToString(),
                 IdentityId = userInfo.IdentityId.ToString(),
@@ -118,14 +120,12 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
                 UserType = (Enums.UserType?)userInfo.UserType,
                 Lines = userInfo.Lines.Select(l => l.ToDto()).ToArray(),
                 UserGroups = userInfo.UserGroups.Select(ug => ug.ToDto()).ToArray(),
-                Message = userInfo.Message,
-                Success = userInfo.Success,
             };
             return toReturn;
         }
-        public static LineDto ToDto(this LineInfo lineInfo)
+        public static LineResponse ToDto(this LineInfo lineInfo)
         {
-            var toReturn = new LineDto
+            var toReturn = new LineResponse
             {
                 Id = lineInfo.Id.ToString(),
                 CanReceive = lineInfo.CanReceive,
@@ -137,9 +137,9 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
             };
             return toReturn;
         }
-        public static UserGroupDto ToDto(this UserGroupInfo userGroupInfo)
+        public static UserGroupResponse ToDto(this UserGroupInfo userGroupInfo)
         {
-            var toReturn = new UserGroupDto
+            var toReturn = new UserGroupResponse
             {
                 Id = userGroupInfo.Id.ToString(),
                 Key = userGroupInfo.UserKey,
@@ -147,11 +147,11 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
             };
             return toReturn;
         }
-        public static UserTelephonySystemDto ToDto(this UserTelephonySystemInfo userTelephonySystemInfo)
+        public static UserTelephonySystemResponse ToDto(this UserTelephonySystemInfo userTelephonySystemInfo)
         {
-            var toReturn = new UserTelephonySystemDto()
+            var toReturn = new UserTelephonySystemResponse()
             {
-                TelephonySystems = Array.ConvertAll(userTelephonySystemInfo.TelephonySystems, utsi => new TelephonySystemDto
+                TelephonySystems = Array.ConvertAll(userTelephonySystemInfo.TelephonySystems, utsi => new TelephonySystemResponse
                 {
                     OfficeId = utsi.OfficeId.ToString(),
                     BrevityName = utsi.BrevityName,
@@ -160,14 +160,12 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
                     ServerAddress = utsi.ServerAddress,
                     Extensions = utsi.Extensions.Select(ext => ext.ToDto()).ToArray(),
                 }),
-                Message = userTelephonySystemInfo.Message,
-                Success = userTelephonySystemInfo.Success,
             };
             return toReturn;
         }
-        public static TelephonySystemExtensionDto ToDto(this TelephonySystemExtensionInfo telephonySystemExtensionInfo)
+        public static TelephonySystemExtensionResponse ToDto(this TelephonySystemExtensionInfo telephonySystemExtensionInfo)
         {
-            var toReturn = new TelephonySystemExtensionDto
+            var toReturn = new TelephonySystemExtensionResponse
             {
                 Id = telephonySystemExtensionInfo.Id.ToString(),
                 Name = telephonySystemExtensionInfo.Name,
@@ -177,20 +175,18 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
             };
             return toReturn;
         }
-        public static CardtableResultDto ToDto(this CardtableResultInfo cardtableResult)
+        public static CardtableResponse ToDto(this CardtableResultInfo cardtableResult)
         {
-            var toReturn = new CardtableResultDto()
+            var toReturn = new CardtableResponse()
             {
                 TotalItemsCount = cardtableResult.TotalItemsCount,
                 CardtableItems = cardtableResult.CardtableItems.Select(cr => cr.ToDto()).ToArray(),
-                Message = cardtableResult.Message,
-                Success = cardtableResult.Success,
             };
             return toReturn;
         }
-        public static CardtableItemDto ToDto(this CardtableItemInfo cardtableItemInfo)
+        public static CardtableItemResponse ToDto(this CardtableItemInfo cardtableItemInfo)
         {
-            var toReturn = new CardtableItemDto
+            var toReturn = new CardtableItemResponse
             {
                 CrmObjectId = cardtableItemInfo.CrmObjectId.ToString(),
                 CrmObjectTypeId = cardtableItemInfo.CrmObjectTypeId.ToStringSafe(),
@@ -213,7 +209,7 @@ namespace AloVoIP.OpenCRM.PayamGostar.Helper
             };
             return toReturn;
         }
-        public static SalesInvoiceCreateModel ToSalesInvoiceCreateModel(this CreateSalesInvoiceDto invoice)
+        public static SalesInvoiceCreateModel ToSalesInvoiceCreateModel(this CreateSalesInvoiceRequest invoice)
         {
             var saleInvoiceCreate = new SalesInvoiceCreateModel
             {

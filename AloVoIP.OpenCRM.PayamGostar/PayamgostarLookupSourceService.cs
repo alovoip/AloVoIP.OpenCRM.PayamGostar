@@ -1,5 +1,6 @@
-﻿using AloVoIP.OpenCRM.Dto;
-using AloVoIP.OpenCRM.PayamGostar.Helper;
+﻿using AloVoIP.OpenCRM.PayamGostar.Helper;
+using AloVoIP.OpenCRM.Requests;
+using AloVoIP.OpenCRM.Responses;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PgContractService;
@@ -68,291 +69,15 @@ namespace AloVoIP.OpenCRM.PayamGostar
             return new PayamgostarServiceClientFactory<IMoneyAccountChannel>().Create(Host);
         }
 
-        public IdentityDto GetIdentityByPhoneNumber(string phoneNumber)
+        private PaymentResponse GetInvoiceInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
         {
-            try
-            {
-                using (var identityChannel = CreateIdentityChannelClient())
-                {
-                    return identityChannel.FindIdentityByPhoneNumber(Username, Password, phoneNumber).IdentityInfo.ToDto();
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"Error in GetIdentityByPhoneNumber. phoneNumber:{phoneNumber}");
-            }
-
-            Log.Debug($"GetIdentityByPhoneNumber, FindIdentityByPhoneNumber result is null. {nameof(phoneNumber)}:{phoneNumber}");
-            return null;
-        }
-
-        public IdentityDto GetIdentityByCustomerNumber(string customerNumber)
-        {
-            try
-            {
-                using (var identityChannel = CreateIdentityChannelClient())
-                {
-                    var result = identityChannel.SearchIdentity(Username, Password, string.Empty, $"CustomerNumber==\"{customerNumber}\"");
-                    if (result.Success)
-                    {
-                        if (result.IdentityInfoList.Length == 0)
-                        {
-                            Log.Debug($"GetIdentityByCustomerNumber, SearchIdentity result is success but identityInfoList is empty. {nameof(customerNumber)}:{customerNumber}");
-                            return null;
-                        }
-                        else
-                            return result.IdentityInfoList[0].ToDto();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"Error in GetIdentityByCustomerNumber. customerNumber:{customerNumber}");
-            }
-
-            Log.Debug($"GetIdentityByCustomerNumber, SearchIdentity result is null. {nameof(customerNumber)}:{customerNumber}");
-            return null;
-        }
-
-        public IdentityDto GetIdentityByCustomerInfo(CustomerDto customerInfo)
-        {
-            try
-            {
-                Guid customerId;
-                if (Guid.TryParse(customerInfo.CustomerId, out customerId))
-                {
-                    using (var identityChannel = CreateIdentityChannelClient())
-                    {
-                        return identityChannel.FindIdentityById(Username, Password, customerId).IdentityInfo.ToDto();
-                    }
-                }
-                if (string.IsNullOrEmpty(customerInfo.CustomerNo))
-                {
-                    return GetIdentityByCustomerNumber(customerInfo.CustomerNo);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in GetIdentityByCustomerInfo. customerInfo: {@customerInfo}", customerInfo);
-            }
-
-            Log.Debug("GetIdentityByCustomerInfo result is null. {@customerInfo}", customerInfo);
-            return null;
-        }
-
-        public UserDto GetUserInfoByIdentityId(string identityId)
-        {
-            try
-            {
-                using (var userChannel = CreateUserChannelClient())
-                {
-                    return userChannel.GetUserByIdentityId(Username, Password, new Guid(identityId)).ToDto();
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in GetUserInfoByIdentityInfo. identityId: {identityId}", identityId);
-            }
-
-            Log.Debug("GetUserInfoByIdentityInfo, GetUserByIdentityId result is null. {identityId}", identityId);
-            return null;
-        }
-
-        public bool IdentityHasValidContract(CustomerDto customerInfo, string contractKey)
-        {
-            try
-            {
-                using (var contractChannel = CreateContractChannelClient())
-                {
-                    var contracts = contractChannel.SearchContract(Username, Password, contractKey, $"IdentityId==\"{customerInfo.CustomerId}\"");
-                    if (!contracts.Success)
-                    {
-                        Log.Debug("IdentityHasValidContract, SearchContract result is not success. customerInfo:{@customerInfo}, contractKey:{contractKey}", customerInfo, contractKey);
-                        return false;
-                    }
-
-                    foreach (var contract in contracts.ContractInfoList)
-                    {
-                        if (contract.EndDate != null)
-                        {
-                            if (contract.EndDate.Value.Date.AddDays(1) > DateTime.Now)
-                            {
-                                if (contract.BillableObjectState == "User.GeneralPropertyItem.BillableObjectState_2" || contract.BillableObjectState == "تایید و شماره گذاری شده")
-                                    return true;
-                                else
-                                    Log.Debug("IdentityHasValidContract, SearchContract found but BillableObjectState is not 'User.GeneralPropertyItem.BillableObjectState_2' or 'تایید و شماره گذاری شده'. customerInfo:{@customerInfo}, contractKey:{@contractKey}", customerInfo, contractKey);
-                            }
-                        }
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in IdentityHasValidContract. customerInfo: {@customerInfo}, contractKey: {@contractKey}", customerInfo, contractKey);
-            }
-
-            Log.Debug("IdentityHasValidContract result is false. customerInfo:{@customerInfo}, contractKey:{@contractKey}", customerInfo, contractKey);
-            return false;
-        }
-
-        public UserTelephonySystemDto GetUserExtenstions(string username)
-        {
-            Log.Debug($"GetUserExtenstions. username:{username}");
-
-            try
-            {
-                using (var userChannel = CreateUserChannelClient())
-                {
-                    return userChannel.GetUserExtensions(Username, Password, username).ToDto();
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"Error in GetUserExtenstions. username:{username}");
-            }
-
-            Log.Debug($"GetUserExtenstions, GetUserExtensions result is null. {nameof(username)}:{username}");
-            return null;
-        }
-
-        public string GetUserExtenstion(string username, string telephonySystemKey)
-        {
-            Log.Debug($"GetUserExtenstion. username:{username}, telephonySystemKey:{telephonySystemKey}");
-
-            try
-            {
-                using (var userChannel = CreateUserChannelClient())
-                {
-                    var userTelephonySystemInfo = userChannel.GetUserExtensions(Username, Password, username);
-                    if (userTelephonySystemInfo != null &&
-                        userTelephonySystemInfo.TelephonySystems != null &&
-                        userTelephonySystemInfo.TelephonySystems.Length > 0)
-                    {
-                        var telephonySystem = userTelephonySystemInfo.TelephonySystems.FirstOrDefault(x => x.Key == telephonySystemKey);
-                        if (telephonySystem != null)
-                        {
-                            var extensions = telephonySystem.Extensions;
-                            if (extensions != null && extensions.Length > 0)
-                            {
-                                return extensions.First().Name;
-                            }
-                            else
-                            {
-                                Log.Debug($"GetUserExtenstion, TelephonySystem extension is null or empty.");
-                            }
-                        }
-                        else
-                        {
-                            Log.Debug($"GetUserExtenstion, TelephonySystem is not found with the given key.");
-                        }
-                    }
-                    else
-                    {
-                        Log.Debug($"GetUserExtenstion, UserTelephonySystemInfo is null or empty.");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"Error in GetUserExtenstion, username:{username}, telephonySystemKey:{telephonySystemKey}");
-            }
-
-            Log.Debug($"GetUserExtenstion, GetUserExtensions result is empty. {nameof(username)}:{username}, {nameof(telephonySystemKey)}:{telephonySystemKey}");
-            return string.Empty;
-        }
-
-        public CardtableResultDto GetCardtable(string crmObjectTypeKey, string identityId)
-        {
-            Log.Debug($"GetCardtable. crmObjectTypeKey:{crmObjectTypeKey}, identityId:{identityId}");
-
-            try
-            {
-
-                using (var crmObjectTypeChannel = CreateCrmObjectTypeClient())
-                {
-                    return crmObjectTypeChannel.GetCardtable(Username,
-                                                             Password,
-                                                             null,
-                                                             null,
-                                                             crmObjectTypeKey,
-                                                             new Guid(identityId),
-                                                             SortOperator.Desc,
-                                                             0,
-                                                             1).ToDto();
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"GetCardtable, crmObjectTypeKey:{crmObjectTypeKey}, identityId:{identityId}");
-            }
-
-            return null;
-        }
-
-        public string GetUserManagerExtenstionBy(int tsId, string userExtenstion)
-        {
-            Log.Debug($"GetUserManagerExtenstionBy. {nameof(tsId)}:{tsId}, {nameof(userExtenstion)}:{userExtenstion}");
-
-            try
-            {
-                using (var userChannel = CreateUserChannelClient())
-                {
-                    var result = userChannel.GetUserHelperExtensionBy(Username,
-                                                                      Password,
-                                                                      userExtenstion);
-                    if (result.Success)
-                        return result.HelperExtension;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"GetUserManagerExtenstionBy. {nameof(userExtenstion)}:{userExtenstion}");
-            }
-
-            Log.Debug($"GetUserManagerExtenstionBy result is null. {nameof(tsId)}:{tsId}, {nameof(userExtenstion)}:{userExtenstion}");
-            return null;
-        }
-
-
-        public decimal? GetCustomerBalance(CustomerDto customerInfo)
-        {
-            try
-            {
-                Guid customerId;
-                if (Guid.TryParse(customerInfo.CustomerId, out customerId))
-                {
-                    using (var identityChannel = CreateIdentityChannelClient())
-                    {
-                        var identityInfoResult = identityChannel.FindIdentityById(Username, Password, new Guid(customerInfo.CustomerId));
-                        if (identityInfoResult.Success &&
-                            identityInfoResult.IdentityInfo != null &&
-                            identityInfoResult.IdentityInfo.Balance.HasValue &&
-                            identityInfoResult.IdentityInfo.Balance.Value < 0)
-                        {
-                            return Math.Abs(identityInfoResult.IdentityInfo.Balance.Value);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in GetCustomerBalance. customerInfo: {@customerInfo}", customerInfo);
-            }
-
-            Log.Debug("GetCustomerBalance result is null. customerInfo:{@customerInfo}", customerInfo);
-            return null;
-        }
-        private PaymentDto GetInvoiceInfo(CustomerDto customerInfo, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
-        {
-            PaymentDto paymentDto = null;
-
+            PaymentResponse paymentResponse = null;
             var query = string.Empty;
 
-            if (customerInfo != null)
+            if (customerRequest != null)
             {
                 Guid customerId;
-                if (Guid.TryParse(customerInfo.CustomerId, out customerId))
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
                 {
                     query = $"IdentityId==\"{customerId}\" & ";
                 }
@@ -376,36 +101,37 @@ namespace AloVoIP.OpenCRM.PayamGostar
                 {
                     var invoice = invoiceInfoResult.InvoiceInfoList[0];
 
-                    paymentDto = new PaymentDto();
+
+                    paymentResponse = new PaymentResponse();
                     if (invoice.IdentityId.HasValue)
-                        paymentDto.IdentityId = invoice.IdentityId.Value.ToString();
+                        paymentResponse.IdentityId = invoice.IdentityId.Value.ToString();
 
                     if (string.IsNullOrEmpty(valueFieldKey))
                     {
-                        paymentDto.Amount = invoice.FinalValue;
+                        paymentResponse.Amount = invoice.FinalValue;
                     }
                     else
                     {
                         decimal res = 0;
                         var contractInfoType = invoice.GetType();
                         if (decimal.TryParse(contractInfoType.GetProperty(valueFieldKey).GetValue(invoice).ToString(), out res))
-                            paymentDto.Amount = res;
+                            paymentResponse.Amount = res;
                     }
                 }
 
-                return paymentDto;
+                return paymentResponse;
             }
         }
-        private PaymentDto GetContractInfo(CustomerDto customerInfo, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
+        private PaymentResponse GetContractInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
         {
-            PaymentDto paymentDto = null;
+            PaymentResponse paymentResponse = null;
 
             var query = string.Empty;
 
-            if (customerInfo != null)
+            if (customerRequest != null)
             {
                 Guid customerId;
-                if (Guid.TryParse(customerInfo.CustomerId, out customerId))
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
                 {
                     query = $"IdentityId==\"{customerId}\" & ";
                 }
@@ -427,110 +153,28 @@ namespace AloVoIP.OpenCRM.PayamGostar
                     contractInfoResult.ContractInfoList != null &&
                     contractInfoResult.ContractInfoList.Length > 0)
                 {
-                    paymentDto = new PaymentDto();
+                    paymentResponse = new PaymentResponse();
 
                     if (contractInfoResult.ContractInfoList[0].IdentityId.HasValue)
-                        paymentDto.IdentityId = contractInfoResult.ContractInfoList[0].IdentityId.Value.ToString();
+                        paymentResponse.IdentityId = contractInfoResult.ContractInfoList[0].IdentityId.Value.ToString();
 
                     if (string.IsNullOrEmpty(valueFieldKey))
                     {
-                        paymentDto.Amount = contractInfoResult.ContractInfoList[0].FinalValue;
+                        paymentResponse.Amount = contractInfoResult.ContractInfoList[0].FinalValue;
                     }
                     else
                     {
                         decimal res = 0;
                         var contractInfoType = contractInfoResult.ContractInfoList[0].GetType();
                         if (decimal.TryParse(contractInfoType.GetProperty(valueFieldKey).GetValue(contractInfoResult.ContractInfoList[0]).ToString(), out res))
-                            paymentDto.Amount = res;
+                            paymentResponse.Amount = res;
                     }
                 }
 
-                return paymentDto;
+                return paymentResponse;
             }
         }
-        public PaymentDto GetPaymentInfo(CustomerDto customerInfo, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
-        {
-            try
-            {
-                using (var crmObjectType = CreateCrmObjectTypeClient())
-                {
-                    var crmObjectTypeInfo = crmObjectType.GetCrmObjectTypeInfo(Username, Password, billableObjectTypeKey);
-                    if (crmObjectTypeInfo != null)
-                    {
-                        Log.Debug("PayamgostarLookupSourceService GetPaymentInfo. customerInfo:{@customerInfo}, billableObjectTypeKey:{@billableObjectTypeKey}, billableObjectNumber:{@billableObjectNumber}, lookupNumberFieldKey:{@lookupNumberFieldKey}, valueFieldKey:{@valueFieldKey}, CrmObjectType:{@CrmObjectType}", customerInfo, billableObjectTypeKey, billableObjectNumber, lookupNumberFieldKey, valueFieldKey, crmObjectTypeInfo.CrmObjectType);
-
-                        switch (crmObjectTypeInfo.CrmObjectType)
-                        {
-                            case CrmObjectTypes.Invoice:
-                                return GetInvoiceInfo(customerInfo, billableObjectTypeKey, billableObjectNumber, lookupNumberFieldKey, valueFieldKey);
-                            case CrmObjectTypes.Quote:
-                                break;
-                            case CrmObjectTypes.Receipt:
-                                break;
-                            case CrmObjectTypes.Contract:
-                                return GetContractInfo(customerInfo, billableObjectTypeKey, billableObjectNumber, lookupNumberFieldKey, valueFieldKey);
-                            case CrmObjectTypes.PurchaseInvoice:
-                                break;
-                            case CrmObjectTypes.ReturnPurchaseInvoice:
-                                break;
-                            case CrmObjectTypes.ReturnSaleInvoice:
-                                break;
-                            case CrmObjectTypes.PurchaseQuote:
-                                break;
-                            case CrmObjectTypes.Payment:
-                                break;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"Error in GetPaymentInfo, billableObjectNumber:{billableObjectNumber}, billableObjectTypeKey:{billableObjectTypeKey}, lookupNumberFieldKey:{lookupNumberFieldKey}");
-            }
-
-            return null;
-        }
-
-        public bool SendPaymentLinkToUser(PaymentDto paymentInfo, string mobileNumber, string moneyAccountUserKey, out string resultMessage)
-        {
-            resultMessage = string.Empty;
-            try
-            {
-                var paymentLinkInfo = new PaymentLinkInfo()
-                {
-                    IdentityId = new Guid(paymentInfo.IdentityId),
-                    Amount = paymentInfo.Amount,
-                    ExpireAfterDays = 7,
-                    Description = string.Empty,
-                    MoneyAccountUserKey = moneyAccountUserKey,
-                    MobilePhoneNumber = mobileNumber,
-                    //PaymentTypeUserKey=
-                };
-                using (var epayChannel = CreateEpayClient())
-                {
-                    var paymentLinkInfoResult = epayChannel.CreatePaymentLink(Username, Password, paymentLinkInfo);
-                    Log.Debug("SendPaymentLinkToUser, paymentLinkInfoResult:{@paymentLinkInfoResult}", paymentLinkInfoResult);
-                    if (paymentLinkInfoResult.Success)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        resultMessage = paymentLinkInfoResult.Message;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                resultMessage = ex.Message;
-                Log.Error(ex, "Error in SendPaymentLinkToUser. paymentInfo:{@paymentInfo}, mobileNumber:{@mobileNumber}, moneyAccountUserKey{@moneyAccountUserKey}", paymentInfo, mobileNumber, moneyAccountUserKey);
-            }
-
-            return false;
-        }
-
-
-        public Dictionary<string, string> GetBillableObjectTypes()
+        public Task<BillableObjectTypesResponse> GetBillableObjectTypes()
         {
             try
             {
@@ -552,10 +196,18 @@ namespace AloVoIP.OpenCRM.PayamGostar
                         CrmObjectTypes.Payment
                     };
 
-                        var lstBillableObjects = lstCrmObjectType.CrmObjectTypeList.Where(x => crmObjectTypes.Contains(x.CrmObjectType) && x.UserKey != "");
+                        var lstBillableObjects = lstCrmObjectType.CrmObjectTypeList.Where(x => crmObjectTypes.Contains(x.CrmObjectType) &&
+                                                                  x.UserKey != "");
                         if (lstBillableObjects != null)
                         {
-                            return lstBillableObjects.ToDictionary(x => x.Name, x => x.UserKey);
+                            return Task.FromResult(new BillableObjectTypesResponse
+                            {
+                                CRMObjectTypes = lstBillableObjects.Select(x => new CrmObjectTypeResponse
+                                {
+                                    Key = x.UserKey,
+                                    Name = x.Name
+                                }).ToList()
+                            });
                         }
                     }
                 }
@@ -567,41 +219,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
 
             return null;
         }
-        public Dictionary<string, string> GetBillableObjectTypeProps(string billableObjectTypeKey)
-        {
-            try
-            {
-                using (var crmObjectType = CreateCrmObjectTypeClient())
-                {
-                    var crmObjectTypeInfo = crmObjectType.GetCrmObjectTypeInfo(Username, Password, billableObjectTypeKey);
-                    if (crmObjectTypeInfo != null &&
-                        crmObjectTypeInfo.PropertyGroups != null &&
-                        crmObjectTypeInfo.PropertyGroups.Length > 0 &&
-                        crmObjectTypeInfo.PropertyGroups[0].Properties != null &&
-                        crmObjectTypeInfo.PropertyGroups[0].Properties.Length > 0)
-                    {
-                        var propertyDisplayTypes = new[]
-                        {
-                    PropertyDisplayType.Text,
-                    PropertyDisplayType.Currency,
-                    PropertyDisplayType.Number
-                };
-
-                        var props = crmObjectTypeInfo.PropertyGroups[0].Properties.Where(x => propertyDisplayTypes.Contains(x.PropertyDisplayType.Value));
-                        if (props != null)
-                            return props.ToDictionary(x => x.Name, x => x.Key);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"Error in GetBillableObjectTypeProps. billableObjectTypeKey:{billableObjectTypeKey}");
-            }
-
-            return null;
-        }
-
-        public Dictionary<string, string> GetMoneyAccounts()
+        public Task<MoneyAccountsResponse> GetMoneyAccounts()
         {
             try
             {
@@ -613,8 +231,16 @@ namespace AloVoIP.OpenCRM.PayamGostar
                         var lstmoneyAccounts = moneyAccountListInfo.Items.Where(x => x.UserKey != "");
                         if (lstmoneyAccounts != null)
                         {
-                            return lstmoneyAccounts.ToDictionary(x => x.Name, x => x.UserKey);
+                            return Task.FromResult(new MoneyAccountsResponse
+                            {
+                                MoneyAccounts = lstmoneyAccounts.Select(x => new MoneyAccountResponse
+                                {
+                                    Key = x.UserKey,
+                                    Name = x.Name
+                                }).ToList()
+                            });
                         }
+
                     }
                 }
             }
@@ -626,13 +252,301 @@ namespace AloVoIP.OpenCRM.PayamGostar
             return null;
         }
 
-        public string CreateInvoice(CreateSalesInvoiceDto invoice)
+        public void Dispose()
         {
-            var result = MyIPgClient.GetSalesInvoiceClient().CallCreate(invoice.ToSalesInvoiceCreateModel());
-            return result.CrmId.ToString();
+
         }
 
-        public async Task<string> EncryptCrmObjectAsync(string guid)
+        public Task<IdentityResponse> GetIdentityByCustomerInfo(CustomerRequest customerRequest)
+        {
+            try
+            {
+                Guid customerId;
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
+                {
+                    using (var identityChannel = CreateIdentityChannelClient())
+                    {
+                        return Task.FromResult(identityChannel.FindIdentityById(Username, Password, customerId).IdentityInfo.ToDto());
+                    }
+                }
+                if (string.IsNullOrEmpty(customerRequest.CustomerNo))
+                {
+                    return GetIdentityByCustomerNumber(new IdentityByCustomerNumberRequest { CustomerNumber = customerRequest.CustomerNo });
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetIdentityByCustomerInfo. customerRequest: {@customerRequest}", customerRequest);
+            }
+
+            Log.Debug("GetIdentityByCustomerInfo result is null. {@customerRequest}", customerRequest);
+            return null;
+        }
+
+        public Task<IdentityResponse> GetIdentityByPhoneNumber(IdentityByPhoneNumberRequest identityByPhoneNumberRequest)
+        {
+            try
+            {
+                using (var identityChannel = CreateIdentityChannelClient())
+                {
+                    return Task.FromResult(identityChannel.FindIdentityByPhoneNumber(Username, Password, identityByPhoneNumberRequest.PhoneNumber).IdentityInfo.ToDto());
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Error in GetIdentityByPhoneNumber. phoneNumber:{identityByPhoneNumberRequest.PhoneNumber}");
+            }
+
+            Log.Debug($"GetIdentityByPhoneNumber, FindIdentityByPhoneNumber result is null. {nameof(identityByPhoneNumberRequest.PhoneNumber)}:{identityByPhoneNumberRequest.PhoneNumber}");
+            return null;
+        }
+
+        public Task<IdentityResponse> GetIdentityByCustomerNumber(IdentityByCustomerNumberRequest identityByCustomerNumberRequest)
+        {
+            try
+            {
+                using (var identityChannel = CreateIdentityChannelClient())
+                {
+                    var result = identityChannel.SearchIdentity(Username, Password, string.Empty,
+                        $"CustomerNumber==\"{identityByCustomerNumberRequest.CustomerNumber}\"");
+                    if (result.Success)
+                    {
+                        if (result.IdentityInfoList.Length == 0)
+                        {
+                            Log.Debug($"GetIdentityByCustomerNumber, SearchIdentity result is success but identityInfoList is empty." +
+                                $" {nameof(identityByCustomerNumberRequest.CustomerNumber)}:{identityByCustomerNumberRequest.CustomerNumber}");
+                            return null;
+                        }
+                        else
+                            return Task.FromResult(result.IdentityInfoList[0].ToDto());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Error in GetIdentityByCustomerNumber. customerNumber:{identityByCustomerNumberRequest.CustomerNumber}");
+            }
+
+            Log.Debug($"GetIdentityByCustomerNumber, SearchIdentity result is null. {nameof(identityByCustomerNumberRequest.CustomerNumber)}:{identityByCustomerNumberRequest.CustomerNumber}");
+            return null;
+        }
+
+        public Task<IdentityHasValidContractResponse> IdentityHasValidContract(IdentityHasValidContractRequest identityHasValidContractRequest)
+        {
+            try
+            {
+                using (var contractChannel = CreateContractChannelClient())
+                {
+                    var contracts = contractChannel.SearchContract(Username, Password, identityHasValidContractRequest.ContractKey,
+                        $"IdentityId==\"{identityHasValidContractRequest.CustomerRequest.CustomerId}\"");
+                    if (!contracts.Success)
+                    {
+                        Log.Debug("IdentityHasValidContract, SearchContract result is not success. customerInfo:{@customerInfo}, contractKey:{contractKey}",
+                            identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
+                        return Task.FromResult(new IdentityHasValidContractResponse { IsValid = false });
+                    }
+
+                    foreach (var contract in contracts.ContractInfoList)
+                    {
+                        if (contract.EndDate != null)
+                        {
+                            if (contract.EndDate.Value.Date.AddDays(1) > DateTime.Now)
+                            {
+                                if (contract.BillableObjectState == "User.GeneralPropertyItem.BillableObjectState_2" || contract.BillableObjectState == "تایید و شماره گذاری شده")
+                                {
+                                    return Task.FromResult(new IdentityHasValidContractResponse { IsValid = true });
+                                }
+                                else
+                                {
+                                    Log.Debug("IdentityHasValidContract, SearchContract found but BillableObjectState is not 'User.GeneralPropertyItem.BillableObjectState_2' or 'تایید و شماره گذاری شده'. customerInfo:{@customerInfo}, contractKey:{@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in IdentityHasValidContract. customerInfo: {@customerInfo}, contractKey: {@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
+            }
+
+            Log.Debug("IdentityHasValidContract result is false. customerInfo:{@customerInfo}, contractKey:{@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
+            return Task.FromResult(new IdentityHasValidContractResponse { IsValid = false });
+        }
+
+        public Task<UserResponse> GetUserInfoByIdentityId(UserInfoByIdentityRequest userInfoByIdentityRequest)
+        {
+            try
+            {
+                using (var userChannel = CreateUserChannelClient())
+                {
+                    return Task.FromResult(userChannel.GetUserByIdentityId(Username, Password, new Guid(userInfoByIdentityRequest.IdentityId)).ToDto());
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetUserInfoByIdentityInfo. identityId: {identityId}", userInfoByIdentityRequest.IdentityId);
+            }
+
+            Log.Debug("GetUserInfoByIdentityInfo, GetUserByIdentityId result is null. {identityId}", userInfoByIdentityRequest.IdentityId);
+            return null;
+        }
+
+        public Task<UserTelephonySystemResponse> GetUserExtensions(UserExtensionsRequest userExtenstionsRequest)
+        {
+            Log.Debug($"GetUserExtensions. username:{userExtenstionsRequest.Username}");
+
+            try
+            {
+                using (var userChannel = CreateUserChannelClient())
+                {
+                    return Task.FromResult(userChannel.GetUserExtensions(Username, Password, userExtenstionsRequest.Username).ToDto());
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Error in GetUserExtensions. username:{userExtenstionsRequest.Username}");
+            }
+
+            Log.Debug($"GetUserExtensions, GetUserExtensions result is null. {nameof(userExtenstionsRequest.Username)}:{userExtenstionsRequest.Username}");
+            return null;
+        }
+
+        public Task<UserExtensionResponse> GetUserDefaultExtension(UserExtensionRequest userExtensionRequest)
+        {
+            Log.Debug($"GetUserDefaultExtension. username:{userExtensionRequest.Username}, telephonySystemKey:{userExtensionRequest.TelephonySystemKey}");
+
+            try
+            {
+                using (var userChannel = CreateUserChannelClient())
+                {
+                    var userTelephonySystemInfo = userChannel.GetUserExtensions(Username, Password, userExtensionRequest.Username);
+                    if (userTelephonySystemInfo != null &&
+                        userTelephonySystemInfo.TelephonySystems != null &&
+                        userTelephonySystemInfo.TelephonySystems.Length > 0)
+                    {
+                        var telephonySystem = userTelephonySystemInfo.TelephonySystems.FirstOrDefault(x => x.Key == userExtensionRequest.TelephonySystemKey);
+                        if (telephonySystem != null)
+                        {
+                            var extensions = telephonySystem.Extensions;
+                            if (extensions != null && extensions.Length > 0)
+                            {
+                                return Task.FromResult(new UserExtensionResponse { Extension = extensions.First().Name });
+                            }
+                            else
+                            {
+                                Log.Debug($"GetUserDefaultExtension, TelephonySystem extension is null or empty.");
+                            }
+                        }
+                        else
+                        {
+                            Log.Debug($"GetUserDefaultExtension, TelephonySystem is not found with the given key.");
+                        }
+                    }
+                    else
+                    {
+                        Log.Debug($"GetUserDefaultExtension, UserTelephonySystemInfo is null or empty.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Error in GetUserDefaultExtension, username:{userExtensionRequest.Username}, telephonySystemKey:{userExtensionRequest.TelephonySystemKey}");
+            }
+
+            Log.Debug($"GetUserExtenstion, GetUserDefaultExtension result is empty. {nameof(userExtensionRequest.Username)}:{userExtensionRequest.Username}, {nameof(userExtensionRequest.TelephonySystemKey)}:{userExtensionRequest.TelephonySystemKey}");
+            return Task.FromResult(new UserExtensionResponse { Extension = string.Empty });
+        }
+
+        public Task<UserExtensionResponse> GetUserManagerExtension(UserManagerByExtensionRequest userManagerByExtensionRequest)
+        {
+            Log.Debug($"GetUserManagerExtension. {nameof(userManagerByExtensionRequest.TsId)}:{userManagerByExtensionRequest.TsId}, {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
+
+            try
+            {
+                using (var userChannel = CreateUserChannelClient())
+                {
+                    var result = userChannel.GetUserHelperExtensionBy(Username,
+                                                                      Password,
+                                                                      userManagerByExtensionRequest.UserExtenstion);
+                    if (result.Success)
+                        return Task.FromResult(new UserExtensionResponse { Extension = result.HelperExtension });
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"GetUserManagerExtension. {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
+            }
+
+            Log.Debug($"GetUserManagerExtension result is null. {nameof(userManagerByExtensionRequest.TsId)}:{userManagerByExtensionRequest.TsId}, {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
+            return null;
+        }
+
+        public Task<CustomerBalanceResponse> GetCustomerBalance(CustomerRequest customerRequest)
+        {
+            try
+            {
+                Guid customerId;
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
+                {
+                    using (var identityChannel = CreateIdentityChannelClient())
+                    {
+                        var identityInfoResult = identityChannel.FindIdentityById(Username, Password, new Guid(customerRequest.CustomerId));
+                        if (identityInfoResult.Success &&
+                            identityInfoResult.IdentityInfo != null &&
+                            identityInfoResult.IdentityInfo.Balance.HasValue &&
+                            identityInfoResult.IdentityInfo.Balance.Value < 0)
+                        {
+                            return Task.FromResult(new CustomerBalanceResponse { Balance = Math.Abs(identityInfoResult.IdentityInfo.Balance.Value) });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetCustomerBalance. customerRequest: {@customerRequest}", customerRequest);
+            }
+
+            Log.Debug("GetCustomerBalance result is null. customerRequest:{@customerRequest}", customerRequest);
+            return null;
+        }
+
+        public Task<CardtableResponse> GetCardtable(CardtableRequest cardtableRequest)
+        {
+            Log.Debug($"GetCardtable. crmObjectTypeKey:{cardtableRequest.CrmObjectTypeKey}, identityId:{cardtableRequest.IdentityId}");
+
+            try
+            {
+                using (var crmObjectTypeChannel = CreateCrmObjectTypeClient())
+                {
+                    return Task.FromResult(crmObjectTypeChannel.GetCardtable(Username,
+                                                             Password,
+                                                             null,
+                                                             null,
+                                                             cardtableRequest.CrmObjectTypeKey,
+                                                             new Guid(cardtableRequest.IdentityId),
+                                                             SortOperator.Desc,
+                                                             0,
+                                                             1).ToDto());
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"GetCardtable, crmObjectTypeKey:{cardtableRequest.CrmObjectTypeKey}, identityId:{cardtableRequest.IdentityId}");
+            }
+
+            return null;
+        }
+
+
+        public Task<CreateInvoiceResponse> CreateInvoice(CreateSalesInvoiceRequest createSalesInvoiceRequest)
+        {
+            var result = MyIPgClient.GetSalesInvoiceClient().CallCreate(createSalesInvoiceRequest.ToSalesInvoiceCreateModel());
+            return Task.FromResult(new CreateInvoiceResponse { InvoiceId = result.CrmId });
+        }
+
+        public async Task<EncryptCrmObjectResponse> EncryptCrmObjectAsync(EncryptCrmObjectRequest encryptCrmObjectRequest)
         {
             var crmId = string.Empty;
             using (var client = new HttpClient())
@@ -657,19 +571,157 @@ namespace AloVoIP.OpenCRM.PayamGostar
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                HttpResponseMessage Res = await client.PostAsync("/api/v2/encryptor/encryptcrmobjectguid?id=" + guid, null);
+                HttpResponseMessage Res = await client.PostAsync("/api/v2/encryptor/encryptcrmobjectguid?id=" + encryptCrmObjectRequest.Guid, null);
                 if (Res.IsSuccessStatusCode)
                 {
                     var crmIdResponse = Res.Content.ReadAsStringAsync().Result;
                     crmId = JsonConvert.DeserializeObject<string>(crmIdResponse);
                 }
             }
-            return crmId;
-
+            return new EncryptCrmObjectResponse { EncryptedObject = crmId };
         }
-        public void Dispose()
+
+        public Task<BillableObjectTypePropsResponse> GetBillableObjectTypeProps(BillableObjectTypePropsRequest billableObjectTypePropsRequest)
         {
+            try
+            {
+                using (var crmObjectType = CreateCrmObjectTypeClient())
+                {
+                    var crmObjectTypeInfo = crmObjectType.GetCrmObjectTypeInfo(Username, Password, billableObjectTypePropsRequest.BillableObjectTypeKey);
+                    if (crmObjectTypeInfo != null &&
+                        crmObjectTypeInfo.PropertyGroups != null &&
+                        crmObjectTypeInfo.PropertyGroups.Length > 0 &&
+                        crmObjectTypeInfo.PropertyGroups[0].Properties != null &&
+                        crmObjectTypeInfo.PropertyGroups[0].Properties.Length > 0)
+                    {
+                        var propertyDisplayTypes = new[]
+                        {
+                    PropertyDisplayType.Text,
+                    PropertyDisplayType.Currency,
+                    PropertyDisplayType.Number
+                };
+                        var props = crmObjectTypeInfo.PropertyGroups[0].Properties.Where(x => propertyDisplayTypes.Contains(x.PropertyDisplayType.Value));
+                        if (props != null)
+                        {
+                            return Task.FromResult(new BillableObjectTypePropsResponse
+                            {
+                                CRMObjectTypes = props.Select(x => new CrmObjectTypeResponse
+                                {
+                                    Key = x.UserKey,
+                                    Name = x.Name
+                                }).ToList()
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Error in GetBillableObjectTypeProps. billableObjectTypeKey:{billableObjectTypePropsRequest.BillableObjectTypeKey}");
+            }
 
+            return null;
         }
+
+        public Task<PaymentResponse> GetPaymentInfo(PaymentInfoRequest paymentInfoRequest)
+        {
+            try
+            {
+                using (var crmObjectType = CreateCrmObjectTypeClient())
+                {
+                    var crmObjectTypeInfo = crmObjectType.GetCrmObjectTypeInfo(Username, Password, paymentInfoRequest.BillableObjectTypeKey);
+                    if (crmObjectTypeInfo != null)
+                    {
+                        Log.Debug("PayamgostarLookupSourceService GetPaymentInfo. CustomerRequest:{@CustomerRequest}, billableObjectTypeKey:{@billableObjectTypeKey}, billableObjectNumber:{@billableObjectNumber}, lookupNumberFieldKey:{@lookupNumberFieldKey}, valueFieldKey:{@valueFieldKey}, CrmObjectType:{@CrmObjectType}", paymentInfoRequest.CustomerRequest, paymentInfoRequest.BillableObjectTypeKey, paymentInfoRequest.BillableObjectNumber, paymentInfoRequest.LookupNumberFieldKey, paymentInfoRequest.ValueFieldKey, crmObjectTypeInfo.CrmObjectType);
+
+                        switch (crmObjectTypeInfo.CrmObjectType)
+                        {
+                            case CrmObjectTypes.Invoice:
+                                var invoiceResult = GetInvoiceInfo(paymentInfoRequest.CustomerRequest,
+                                                      paymentInfoRequest.BillableObjectTypeKey,
+                                                      paymentInfoRequest.BillableObjectNumber,
+                                                      paymentInfoRequest.LookupNumberFieldKey,
+                                                      paymentInfoRequest.ValueFieldKey);
+                                return Task.FromResult(new PaymentResponse { Amount = invoiceResult.Amount, IdentityId = invoiceResult.IdentityId });
+                            case CrmObjectTypes.Quote:
+                                break;
+                            case CrmObjectTypes.Receipt:
+                                break;
+                            case CrmObjectTypes.Contract:
+                                var contractResult = GetContractInfo(paymentInfoRequest.CustomerRequest,
+                                                       paymentInfoRequest.BillableObjectTypeKey,
+                                                       paymentInfoRequest.BillableObjectNumber,
+                                                       paymentInfoRequest.LookupNumberFieldKey,
+                                                       paymentInfoRequest.ValueFieldKey);
+                                return Task.FromResult(new PaymentResponse { Amount = contractResult.Amount, IdentityId = contractResult.IdentityId });
+                            case CrmObjectTypes.PurchaseInvoice:
+                                break;
+                            case CrmObjectTypes.ReturnPurchaseInvoice:
+                                break;
+                            case CrmObjectTypes.ReturnSaleInvoice:
+                                break;
+                            case CrmObjectTypes.PurchaseQuote:
+                                break;
+                            case CrmObjectTypes.Payment:
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Error in GetPaymentInfo, billableObjectNumber:{paymentInfoRequest.BillableObjectNumber}, billableObjectTypeKey:{paymentInfoRequest.BillableObjectTypeKey}, lookupNumberFieldKey:{paymentInfoRequest.LookupNumberFieldKey}");
+            }
+
+            return null;
+        }
+
+        public Task<SendPaymentLinkToUserResponse> SendPaymentLinkToUser(SendPaymentLinkToUserRequest sendPaymentLinkToUserRequest)
+        {
+            SendPaymentLinkToUserResponse response = new SendPaymentLinkToUserResponse();
+            response.Message = string.Empty;
+            try
+            {
+                var paymentLinkInfo = new PaymentLinkInfo()
+                {
+                    IdentityId = new Guid(sendPaymentLinkToUserRequest.PaymentInfo.IdentityId),
+                    Amount = sendPaymentLinkToUserRequest.PaymentInfo.Amount,
+                    ExpireAfterDays = 7,
+                    Description = string.Empty,
+                    MoneyAccountUserKey = sendPaymentLinkToUserRequest.MoneyAccountUserKey,
+                    MobilePhoneNumber = sendPaymentLinkToUserRequest.MobileNumber,
+                    //PaymentTypeUserKey=
+                };
+                using (var epayChannel = CreateEpayClient())
+                {
+                    var paymentLinkInfoResult = epayChannel.CreatePaymentLink(Username, Password, paymentLinkInfo);
+                    Log.Debug("SendPaymentLinkToUser, paymentLinkInfoResult:{@paymentLinkInfoResult}", paymentLinkInfoResult);
+                    if (paymentLinkInfoResult.Success)
+                    {
+                        response.IsSuccess = true;
+                        return Task.FromResult(response);
+                    }
+                    else
+                    {
+                        response.IsSuccess = false;
+                        response.Message = paymentLinkInfoResult.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+                Log.Error(ex, "Error in SendPaymentLinkToUser. paymentInfo:{@paymentInfo}, mobileNumber:{@mobileNumber}, moneyAccountUserKey{@moneyAccountUserKey}", sendPaymentLinkToUserRequest.PaymentInfo, sendPaymentLinkToUserRequest.MobileNumber, sendPaymentLinkToUserRequest.MoneyAccountUserKey);
+            }
+            response.IsSuccess = false;
+            return Task.FromResult(response);
+        }
+
+        public Task<CrmObjectUrlResponse> GetCrmObjectUrl(CrmObjectUrlRequest crmObjectUrlRequest)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }
