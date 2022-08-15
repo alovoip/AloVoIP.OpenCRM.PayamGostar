@@ -23,17 +23,9 @@ namespace AloVoIP.OpenCRM.PayamGostar
 {
     public class PayamgostarLookupSourceService : PayamGostarCallStoreService, ILookupSourceService
     {
-        string lookupSourceId;
-        string lookupSourceHost;
-        string lookupSourceUsername;
-        string lookupSourcePassword;
         public PayamgostarLookupSourceService(string lookupSourceId, string host, string username, string password)
             : base(lookupSourceId, host, username, password)
         {
-            this.lookupSourceId = lookupSourceId;
-            this.lookupSourceHost = host;
-            this.lookupSourceUsername = username;
-            this.lookupSourcePassword = password;
         }
 
         public ICrmObjectTypeChannel CreateCrmObjectTypeClient()
@@ -554,13 +546,11 @@ namespace AloVoIP.OpenCRM.PayamGostar
                 client.BaseAddress = new Uri(Host);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var username = lookupSourceUsername;
-                var password = lookupSourcePassword;
                 var formContent = new FormUrlEncodedContent(new[]
                 {
                   new KeyValuePair<string, string>("grant_type", "password"),
-                  new KeyValuePair<string, string>("username", username),
-                  new KeyValuePair<string, string>("password", password),
+                  new KeyValuePair<string, string>("username", Username),
+                  new KeyValuePair<string, string>("password", Password),
                 });
 
                 HttpResponseMessage responseMessage = await client.PostAsync("/api/v2/auth/login", formContent);

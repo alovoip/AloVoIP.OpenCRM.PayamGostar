@@ -43,8 +43,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
         }
 
-        string ICallStoreService.CallStoreId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
         private IPgClient Create(string endPointAddress, string userName, string password)
         {
             return new PgClientFactory().Create(endPointAddress, new PgCredentials()
