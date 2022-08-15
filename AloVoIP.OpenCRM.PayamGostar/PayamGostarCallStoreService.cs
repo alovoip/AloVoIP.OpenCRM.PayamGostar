@@ -28,7 +28,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             Username = username;
             Password = password;
         }
-
         protected IPgClient MyIPgClient
         {
             get
@@ -42,22 +41,12 @@ namespace AloVoIP.OpenCRM.PayamGostar
                 return _pgClient;
             }
         }
-
         private IPgClient Create(string endPointAddress, string userName, string password)
         {
             return new PgClientFactory().Create(endPointAddress, new PgCredentials()
             {
                 Username = userName,
                 Password = password
-            });
-        }
-        public void MergeCall(string tsKey, long sourceCallId, long destCallId)
-        {
-            MyIPgClient.GetTelephonySystem().MergeCall(new Septa.PayamGostarApiClient.TelephonySystem.CallMergeModel()
-            {
-                TsKey = tsKey,
-                SourceCallId = sourceCallId,
-                DestinationCallId = destCallId,
             });
         }
 
@@ -216,7 +205,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             };
             return Task.FromResult(response);
         }
-
         public Task<MergeCallResponse> MergeCall(MergeCallRequest mergeCallRequest)
         {
             MyIPgClient.GetTelephonySystem().MergeCall(new Septa.PayamGostarApiClient.TelephonySystem.CallMergeModel()

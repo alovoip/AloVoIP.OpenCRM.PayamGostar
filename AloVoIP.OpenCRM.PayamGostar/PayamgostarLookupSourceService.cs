@@ -243,12 +243,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
 
             return null;
         }
-
-        public void Dispose()
-        {
-
-        }
-
         public Task<IdentityResponse> GetIdentityByCustomerInfo(CustomerRequest customerRequest)
         {
             try
@@ -274,7 +268,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             Log.Debug("GetIdentityByCustomerInfo result is null. {@customerRequest}", customerRequest);
             return null;
         }
-
         public Task<IdentityResponse> GetIdentityByPhoneNumber(IdentityByPhoneNumberRequest identityByPhoneNumberRequest)
         {
             try
@@ -292,7 +285,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             Log.Debug($"GetIdentityByPhoneNumber, FindIdentityByPhoneNumber result is null. {nameof(identityByPhoneNumberRequest.PhoneNumber)}:{identityByPhoneNumberRequest.PhoneNumber}");
             return null;
         }
-
         public Task<IdentityResponse> GetIdentityByCustomerNumber(IdentityByCustomerNumberRequest identityByCustomerNumberRequest)
         {
             try
@@ -322,7 +314,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             Log.Debug($"GetIdentityByCustomerNumber, SearchIdentity result is null. {nameof(identityByCustomerNumberRequest.CustomerNumber)}:{identityByCustomerNumberRequest.CustomerNumber}");
             return null;
         }
-
         public Task<IdentityHasValidContractResponse> IdentityHasValidContract(IdentityHasValidContractRequest identityHasValidContractRequest)
         {
             try
@@ -366,7 +357,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             Log.Debug("IdentityHasValidContract result is false. customerInfo:{@customerInfo}, contractKey:{@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
             return Task.FromResult(new IdentityHasValidContractResponse { IsValid = false });
         }
-
         public Task<UserResponse> GetUserInfoByIdentityId(UserInfoByIdentityRequest userInfoByIdentityRequest)
         {
             try
@@ -384,7 +374,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             Log.Debug("GetUserInfoByIdentityInfo, GetUserByIdentityId result is null. {identityId}", userInfoByIdentityRequest.IdentityId);
             return null;
         }
-
         public Task<UserTelephonySystemResponse> GetUserExtensions(UserExtensionsRequest userExtenstionsRequest)
         {
             Log.Debug($"GetUserExtensions. username:{userExtenstionsRequest.Username}");
@@ -404,7 +393,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             Log.Debug($"GetUserExtensions, GetUserExtensions result is null. {nameof(userExtenstionsRequest.Username)}:{userExtenstionsRequest.Username}");
             return null;
         }
-
         public Task<UserExtensionResponse> GetUserDefaultExtension(UserExtensionRequest userExtensionRequest)
         {
             Log.Debug($"GetUserDefaultExtension. username:{userExtensionRequest.Username}, telephonySystemKey:{userExtensionRequest.TelephonySystemKey}");
@@ -448,9 +436,8 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
 
             Log.Debug($"GetUserExtenstion, GetUserDefaultExtension result is empty. {nameof(userExtensionRequest.Username)}:{userExtensionRequest.Username}, {nameof(userExtensionRequest.TelephonySystemKey)}:{userExtensionRequest.TelephonySystemKey}");
-            return Task.FromResult(new UserExtensionResponse { Extension = string.Empty });
+            return null;
         }
-
         public Task<UserExtensionResponse> GetUserManagerExtension(UserManagerByExtensionRequest userManagerByExtensionRequest)
         {
             Log.Debug($"GetUserManagerExtension. {nameof(userManagerByExtensionRequest.TsId)}:{userManagerByExtensionRequest.TsId}, {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
@@ -474,7 +461,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             Log.Debug($"GetUserManagerExtension result is null. {nameof(userManagerByExtensionRequest.TsId)}:{userManagerByExtensionRequest.TsId}, {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
             return null;
         }
-
         public Task<CustomerBalanceResponse> GetCustomerBalance(CustomerRequest customerRequest)
         {
             try
@@ -503,7 +489,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             Log.Debug("GetCustomerBalance result is null. customerRequest:{@customerRequest}", customerRequest);
             return null;
         }
-
         public Task<CardtableResponse> GetCardtable(CardtableRequest cardtableRequest)
         {
             Log.Debug($"GetCardtable. crmObjectTypeKey:{cardtableRequest.CrmObjectTypeKey}, identityId:{cardtableRequest.IdentityId}");
@@ -530,14 +515,14 @@ namespace AloVoIP.OpenCRM.PayamGostar
 
             return null;
         }
-
-
         public Task<CreateInvoiceResponse> CreateInvoice(CreateSalesInvoiceRequest createSalesInvoiceRequest)
         {
             var result = MyIPgClient.GetSalesInvoiceClient().CallCreate(createSalesInvoiceRequest.ToSalesInvoiceCreateModel());
-            return Task.FromResult(new CreateInvoiceResponse { InvoiceId = result.CrmId });
+            return Task.FromResult(new CreateInvoiceResponse
+            {
+                InvoiceId = result.CrmId
+            });
         }
-
         public async Task<EncryptCrmObjectResponse> EncryptCrmObjectAsync(EncryptCrmObjectRequest encryptCrmObjectRequest)
         {
             var crmId = string.Empty;
@@ -570,7 +555,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             return new EncryptCrmObjectResponse { EncryptedObject = crmId };
         }
-
         public Task<BillableObjectTypePropsResponse> GetBillableObjectTypeProps(BillableObjectTypePropsRequest billableObjectTypePropsRequest)
         {
             try
@@ -612,7 +596,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
 
             return null;
         }
-
         public Task<PaymentResponse> GetPaymentInfo(PaymentInfoRequest paymentInfoRequest)
         {
             try
@@ -665,7 +648,6 @@ namespace AloVoIP.OpenCRM.PayamGostar
 
             return null;
         }
-
         public Task<SendPaymentLinkToUserResponse> SendPaymentLinkToUser(SendPaymentLinkToUserRequest sendPaymentLinkToUserRequest)
         {
             SendPaymentLinkToUserResponse response = new SendPaymentLinkToUserResponse();
@@ -707,10 +689,13 @@ namespace AloVoIP.OpenCRM.PayamGostar
             response.IsSuccess = false;
             return Task.FromResult(response);
         }
-
         public Task<CrmObjectUrlResponse> GetCrmObjectUrl(CrmObjectUrlRequest crmObjectUrlRequest)
         {
             throw new NotImplementedException();
+        }
+        public void Dispose()
+        {
+
         }
 
     }

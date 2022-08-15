@@ -1590,7 +1590,7 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
-    "version": "1.1.3",
+    "version": "1.1.4",
     "restore": {
       "projectUniqueName": "E:\\Code\\PayamDarabi\\AloVoIP.OpenCRM.PayamGostar\\AloVoIP.OpenCRM.PayamGostar\\AloVoIP.OpenCRM.PayamGostar.csproj",
       "projectName": "AloVoIP.OpenCRM.PayamGostar",
