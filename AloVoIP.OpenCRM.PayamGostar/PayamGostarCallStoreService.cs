@@ -3,7 +3,6 @@ using AloVoIP.OpenCRM.Requests;
 using AloVoIP.OpenCRM.Responses;
 using PayamGostarClient;
 using PayamGostarClient.TelephonySystem;
-using Septa.PayamGostarApiClient.TelephonySystem;
 using Serilog;
 using System;
 using System.Threading.Tasks;
@@ -56,12 +55,12 @@ namespace AloVoIP.OpenCRM.PayamGostar
             {
                 case CallType.Incoming:
                     return callResult == CallResult.Answered
-                            ? PayamGostarClient.TelephonySystem.PhoneCallType.ReceivedCall
-                            : PayamGostarClient.TelephonySystem.PhoneCallType.MissedCall;
+                            ? PhoneCallType.ReceivedCall
+                            : PhoneCallType.MissedCall;
                 case CallType.Outgoing:
-                    return PayamGostarClient.TelephonySystem.PhoneCallType.OutgoingCall;
+                    return PhoneCallType.OutgoingCall;
                 case CallType.Internal:
-                    return PayamGostarClient.TelephonySystem.PhoneCallType.Internal;
+                    return PhoneCallType.Internal;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -71,9 +70,9 @@ namespace AloVoIP.OpenCRM.PayamGostar
             switch (channelOwnerType)
             {
                 case PeerType.Trunk:
-                    return PayamGostarClient.TelephonySystem.TelephonySystemPeerType.Trunk;
+                    return TelephonySystemPeerType.Trunk;
                 case PeerType.Extension:
-                    return PayamGostarClient.TelephonySystem.TelephonySystemPeerType.Extension;
+                    return TelephonySystemPeerType.Extension;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -102,17 +101,17 @@ namespace AloVoIP.OpenCRM.PayamGostar
                 case ChannelState.OffHook:
                 case ChannelState.Unknown:
                 case ChannelState.Busy:
-                    return PayamGostarClient.TelephonySystem.ChannelStatus.Down;
+                    return ChannelStatus.Down;
                 case ChannelState.PreRing:
                 case ChannelState.Ring:
                 case ChannelState.Ringing:
                 case ChannelState.Dialing:
                 case ChannelState.DialingOffhook:
-                    return PayamGostarClient.TelephonySystem.ChannelStatus.Ringing;
+                    return ChannelStatus.Ringing;
                 case ChannelState.Up:
-                    return PayamGostarClient.TelephonySystem.ChannelStatus.Up;
+                    return ChannelStatus.Up;
                 case ChannelState.Hangedup:
-                    return PayamGostarClient.TelephonySystem.ChannelStatus.HangUp;
+                    return ChannelStatus.HangUp;
                 default:
                     Log.Error($"Error in converting channelStatus to PayamGostarChannelStatus: {nameof(channelState)}:{channelState}");
                     throw new ArgumentOutOfRangeException();
