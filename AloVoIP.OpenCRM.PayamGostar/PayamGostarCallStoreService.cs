@@ -83,12 +83,17 @@ namespace AloVoIP.OpenCRM.PayamGostar
             {
                 case ChannelResponse.Answered:
                     return PayamGostarClient.TelephonySystem.ChannelResponse.Answered;
-                case ChannelResponse.NotAnswered:
-                    return PayamGostarClient.TelephonySystem.ChannelResponse.NotAnswered;
+                
                 case ChannelResponse.Busy:
                     return PayamGostarClient.TelephonySystem.ChannelResponse.Busy;
+                
                 case ChannelResponse.Transfered:
                     return PayamGostarClient.TelephonySystem.ChannelResponse.Transfered;
+                
+                case ChannelResponse.NotAnswered:
+                case ChannelResponse.Failed:
+                case ChannelResponse.Unavailable:
+                    return PayamGostarClient.TelephonySystem.ChannelResponse.NotAnswered;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

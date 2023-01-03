@@ -698,5 +698,14 @@ namespace AloVoIP.OpenCRM.PayamGostar
 
         }
 
+        public Task<SubmitQueueOperatorVotingResponse> SubmitQueueOperatorVoting(SubmitQueueOperatorVotingRequest submitQueueOperatorVotingRequest)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<SubmitVotingResponse> SubmitVoting(SubmitVotingRequest submitVotingRequest)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
