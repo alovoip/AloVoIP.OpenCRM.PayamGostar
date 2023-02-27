@@ -7,13 +7,13 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PgCrmObjectTypeService
+namespace PgCrmObjectType
 {
     using System;
     using System.Runtime.Serialization;
     
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.FlagsAttribute()]
     [System.Runtime.Serialization.DataContractAttribute(Name="CrmObjectTypes", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
@@ -94,11 +94,11 @@ namespace PgCrmObjectTypeService
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="OperationResult", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
-    [System.Runtime.Serialization.KnownTypeAttribute(typeof(PgCrmObjectTypeService.CardtableResultInfo))]
-    [System.Runtime.Serialization.KnownTypeAttribute(typeof(PgCrmObjectTypeService.CrmObjectTypeListInfo))]
+    [System.Runtime.Serialization.KnownTypeAttribute(typeof(PgCrmObjectType.CardtableResultInfo))]
+    [System.Runtime.Serialization.KnownTypeAttribute(typeof(PgCrmObjectType.CrmObjectTypeListInfo))]
     public partial class OperationResult : object
     {
         
@@ -134,18 +134,18 @@ namespace PgCrmObjectTypeService
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="CardtableResultInfo", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
-    public partial class CardtableResultInfo : PgCrmObjectTypeService.OperationResult
+    public partial class CardtableResultInfo : PgCrmObjectType.OperationResult
     {
         
-        private PgCrmObjectTypeService.CardtableItemInfo[] CardtableItemsField;
+        private PgCrmObjectType.CardtableItemInfo[] CardtableItemsField;
         
         private int TotalItemsCountField;
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public PgCrmObjectTypeService.CardtableItemInfo[] CardtableItems
+        public PgCrmObjectType.CardtableItemInfo[] CardtableItems
         {
             get
             {
@@ -172,16 +172,16 @@ namespace PgCrmObjectTypeService
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="CrmObjectTypeListInfo", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
-    public partial class CrmObjectTypeListInfo : PgCrmObjectTypeService.OperationResult
+    public partial class CrmObjectTypeListInfo : PgCrmObjectType.OperationResult
     {
         
-        private PgCrmObjectTypeService.CrmObjectTypeBasicInfo[] CrmObjectTypeListField;
+        private PgCrmObjectType.CrmObjectTypeBasicInfo[] CrmObjectTypeListField;
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public PgCrmObjectTypeService.CrmObjectTypeBasicInfo[] CrmObjectTypeList
+        public PgCrmObjectType.CrmObjectTypeBasicInfo[] CrmObjectTypeList
         {
             get
             {
@@ -195,16 +195,16 @@ namespace PgCrmObjectTypeService
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="CrmObjectTypeBasicInfo", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
-    [System.Runtime.Serialization.KnownTypeAttribute(typeof(PgCrmObjectTypeService.CrmObjectTypeInfo))]
+    [System.Runtime.Serialization.KnownTypeAttribute(typeof(PgCrmObjectType.CrmObjectTypeInfo))]
     public partial class CrmObjectTypeBasicInfo : object
     {
         
         private bool CreateByCustomerField;
         
-        private PgCrmObjectTypeService.CrmObjectTypes CrmObjectTypeField;
+        private PgCrmObjectType.CrmObjectTypes CrmObjectTypeField;
         
         private System.Guid IdField;
         
@@ -238,7 +238,7 @@ namespace PgCrmObjectTypeService
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public PgCrmObjectTypeService.CrmObjectTypes CrmObjectType
+        public PgCrmObjectType.CrmObjectTypes CrmObjectType
         {
             get
             {
@@ -369,17 +369,17 @@ namespace PgCrmObjectTypeService
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="CardtableItemInfo", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
     public partial class CardtableItemInfo : object
     {
         
-        private PgCrmObjectTypeService.CardtableStatus CardtableStatusField;
+        private PgCrmObjectType.CardtableStatus CardtableStatusField;
         
         private System.Guid CrmObjectIdField;
         
-        private System.Nullable<PgCrmObjectTypeService.CrmObjectTypes> CrmObjectTypeField;
+        private System.Nullable<PgCrmObjectType.CrmObjectTypes> CrmObjectTypeField;
         
         private System.Nullable<System.Guid> CrmObjectTypeIdField;
         
@@ -401,9 +401,9 @@ namespace PgCrmObjectTypeService
         
         private long ProcessInstanceIdField;
         
-        private System.Nullable<PgCrmObjectTypeService.ProcessInstanceType> ProcessInstanceTypeField;
+        private System.Nullable<PgCrmObjectType.ProcessInstanceType> ProcessInstanceTypeField;
         
-        private System.Nullable<PgCrmObjectTypeService.StateActionType> StateActionTypeIndexField;
+        private System.Nullable<PgCrmObjectType.StateActionType> StateActionTypeIndexField;
         
         private System.Nullable<System.Guid> StateIdField;
         
@@ -414,7 +414,7 @@ namespace PgCrmObjectTypeService
         private string SubjectField;
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public PgCrmObjectTypeService.CardtableStatus CardtableStatus
+        public PgCrmObjectType.CardtableStatus CardtableStatus
         {
             get
             {
@@ -440,7 +440,7 @@ namespace PgCrmObjectTypeService
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public System.Nullable<PgCrmObjectTypeService.CrmObjectTypes> CrmObjectType
+        public System.Nullable<PgCrmObjectType.CrmObjectTypes> CrmObjectType
         {
             get
             {
@@ -583,7 +583,7 @@ namespace PgCrmObjectTypeService
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public System.Nullable<PgCrmObjectTypeService.ProcessInstanceType> ProcessInstanceType
+        public System.Nullable<PgCrmObjectType.ProcessInstanceType> ProcessInstanceType
         {
             get
             {
@@ -596,7 +596,7 @@ namespace PgCrmObjectTypeService
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public System.Nullable<PgCrmObjectTypeService.StateActionType> StateActionTypeIndex
+        public System.Nullable<PgCrmObjectType.StateActionType> StateActionTypeIndex
         {
             get
             {
@@ -661,7 +661,7 @@ namespace PgCrmObjectTypeService
         }
     }
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.FlagsAttribute()]
     [System.Runtime.Serialization.DataContractAttribute(Name="CardtableStatus", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
@@ -684,7 +684,7 @@ namespace PgCrmObjectTypeService
         Finished = 5,
     }
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.FlagsAttribute()]
     [System.Runtime.Serialization.DataContractAttribute(Name="ProcessInstanceType", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
@@ -701,7 +701,7 @@ namespace PgCrmObjectTypeService
         FollowUp = 3,
     }
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.FlagsAttribute()]
     [System.Runtime.Serialization.DataContractAttribute(Name="StateActionType", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
@@ -797,15 +797,15 @@ namespace PgCrmObjectTypeService
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="CrmObjectTypeInfo", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
-    public partial class CrmObjectTypeInfo : PgCrmObjectTypeService.CrmObjectTypeBasicInfo
+    public partial class CrmObjectTypeInfo : PgCrmObjectType.CrmObjectTypeBasicInfo
     {
         
         private string MessageField;
         
-        private PgCrmObjectTypeService.PropertyGroupInfo[] PropertyGroupsField;
+        private PgCrmObjectType.PropertyGroupInfo[] PropertyGroupsField;
         
         private bool SuccessField;
         
@@ -823,7 +823,7 @@ namespace PgCrmObjectTypeService
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public PgCrmObjectTypeService.PropertyGroupInfo[] PropertyGroups
+        public PgCrmObjectType.PropertyGroupInfo[] PropertyGroups
         {
             get
             {
@@ -850,7 +850,7 @@ namespace PgCrmObjectTypeService
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="PropertyGroupInfo", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
     public partial class PropertyGroupInfo : object
@@ -862,7 +862,7 @@ namespace PgCrmObjectTypeService
         
         private string NameField;
         
-        private PgCrmObjectTypeService.PropertyDefinitionInfo[] PropertiesField;
+        private PgCrmObjectType.PropertyDefinitionInfo[] PropertiesField;
         
         [System.Runtime.Serialization.DataMemberAttribute()]
         public int DisplayIndex
@@ -904,7 +904,7 @@ namespace PgCrmObjectTypeService
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public PgCrmObjectTypeService.PropertyDefinitionInfo[] Properties
+        public PgCrmObjectType.PropertyDefinitionInfo[] Properties
         {
             get
             {
@@ -918,7 +918,7 @@ namespace PgCrmObjectTypeService
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="PropertyDefinitionInfo", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
     public partial class PropertyDefinitionInfo : object
@@ -930,11 +930,11 @@ namespace PgCrmObjectTypeService
         
         private string NameField;
         
-        private System.Nullable<PgCrmObjectTypeService.PropertyDisplayType> PropertyDisplayTypeField;
+        private System.Nullable<PgCrmObjectType.PropertyDisplayType> PropertyDisplayTypeField;
         
         private string UserKeyField;
         
-        private PgCrmObjectTypeService.PropertyDefinitionValueInfo[] ValuesField;
+        private PgCrmObjectType.PropertyDefinitionValueInfo[] ValuesField;
         
         [System.Runtime.Serialization.DataMemberAttribute()]
         public System.Guid Id
@@ -976,7 +976,7 @@ namespace PgCrmObjectTypeService
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public System.Nullable<PgCrmObjectTypeService.PropertyDisplayType> PropertyDisplayType
+        public System.Nullable<PgCrmObjectType.PropertyDisplayType> PropertyDisplayType
         {
             get
             {
@@ -1002,7 +1002,7 @@ namespace PgCrmObjectTypeService
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public PgCrmObjectTypeService.PropertyDefinitionValueInfo[] Values
+        public PgCrmObjectType.PropertyDefinitionValueInfo[] Values
         {
             get
             {
@@ -1015,7 +1015,7 @@ namespace PgCrmObjectTypeService
         }
     }
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.FlagsAttribute()]
     [System.Runtime.Serialization.DataContractAttribute(Name="PropertyDisplayType", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
@@ -1222,7 +1222,7 @@ namespace PgCrmObjectTypeService
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="PropertyDefinitionValueInfo", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
     public partial class PropertyDefinitionValueInfo : object
@@ -1289,7 +1289,7 @@ namespace PgCrmObjectTypeService
         }
     }
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
     [System.FlagsAttribute()]
     [System.Runtime.Serialization.DataContractAttribute(Name="SortOperator", Namespace="http://schemas.datacontract.org/2004/07/Septa.PayamGostar.ServiceLayer.Contract.P" +
         "GContracts.DataContracts")]
@@ -1303,38 +1303,38 @@ namespace PgCrmObjectTypeService
         Desc = 2,
     }
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
-    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="PgCrmObjectTypeService.ICrmObjectType")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
+    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="PgCrmObjectType.ICrmObjectType")]
     public interface ICrmObjectType
     {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ICrmObjectType/GetCrmObjectTypeList", ReplyAction="http://tempuri.org/ICrmObjectType/GetCrmObjectTypeListResponse")]
-        PgCrmObjectTypeService.CrmObjectTypeListInfo GetCrmObjectTypeList(string username, string password, System.Nullable<PgCrmObjectTypeService.CrmObjectTypes> crmObjectTypeIndex);
+        PgCrmObjectType.CrmObjectTypeListInfo GetCrmObjectTypeList(string username, string password, System.Nullable<PgCrmObjectType.CrmObjectTypes> crmObjectTypeIndex);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ICrmObjectType/GetCrmObjectTypeList", ReplyAction="http://tempuri.org/ICrmObjectType/GetCrmObjectTypeListResponse")]
-        System.Threading.Tasks.Task<PgCrmObjectTypeService.CrmObjectTypeListInfo> GetCrmObjectTypeListAsync(string username, string password, System.Nullable<PgCrmObjectTypeService.CrmObjectTypes> crmObjectTypeIndex);
+        System.Threading.Tasks.Task<PgCrmObjectType.CrmObjectTypeListInfo> GetCrmObjectTypeListAsync(string username, string password, System.Nullable<PgCrmObjectType.CrmObjectTypes> crmObjectTypeIndex);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ICrmObjectType/GetCrmObjectTypeInfo", ReplyAction="http://tempuri.org/ICrmObjectType/GetCrmObjectTypeInfoResponse")]
-        PgCrmObjectTypeService.CrmObjectTypeInfo GetCrmObjectTypeInfo(string username, string password, string typeKeyOrId);
+        PgCrmObjectType.CrmObjectTypeInfo GetCrmObjectTypeInfo(string username, string password, string typeKeyOrId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ICrmObjectType/GetCrmObjectTypeInfo", ReplyAction="http://tempuri.org/ICrmObjectType/GetCrmObjectTypeInfoResponse")]
-        System.Threading.Tasks.Task<PgCrmObjectTypeService.CrmObjectTypeInfo> GetCrmObjectTypeInfoAsync(string username, string password, string typeKeyOrId);
+        System.Threading.Tasks.Task<PgCrmObjectType.CrmObjectTypeInfo> GetCrmObjectTypeInfoAsync(string username, string password, string typeKeyOrId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ICrmObjectType/GetCardtable", ReplyAction="http://tempuri.org/ICrmObjectType/GetCardtableResponse")]
-        PgCrmObjectTypeService.CardtableResultInfo GetCardtable(string username, string password, string cardtabeHolder, System.Nullable<PgCrmObjectTypeService.ProcessInstanceType> instanceType, string crmObjectTypeKey, System.Nullable<System.Guid> identityId, PgCrmObjectTypeService.SortOperator sortOperator, int pageIndex, int pageSize);
+        PgCrmObjectType.CardtableResultInfo GetCardtable(string username, string password, string cardtabeHolder, System.Nullable<PgCrmObjectType.ProcessInstanceType> instanceType, string crmObjectTypeKey, System.Nullable<System.Guid> identityId, PgCrmObjectType.SortOperator sortOperator, int pageIndex, int pageSize);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ICrmObjectType/GetCardtable", ReplyAction="http://tempuri.org/ICrmObjectType/GetCardtableResponse")]
-        System.Threading.Tasks.Task<PgCrmObjectTypeService.CardtableResultInfo> GetCardtableAsync(string username, string password, string cardtabeHolder, System.Nullable<PgCrmObjectTypeService.ProcessInstanceType> instanceType, string crmObjectTypeKey, System.Nullable<System.Guid> identityId, PgCrmObjectTypeService.SortOperator sortOperator, int pageIndex, int pageSize);
+        System.Threading.Tasks.Task<PgCrmObjectType.CardtableResultInfo> GetCardtableAsync(string username, string password, string cardtabeHolder, System.Nullable<PgCrmObjectType.ProcessInstanceType> instanceType, string crmObjectTypeKey, System.Nullable<System.Guid> identityId, PgCrmObjectType.SortOperator sortOperator, int pageIndex, int pageSize);
     }
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
-    public interface ICrmObjectTypeChannel : PgCrmObjectTypeService.ICrmObjectType, System.ServiceModel.IClientChannel
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
+    public interface ICrmObjectTypeChannel : PgCrmObjectType.ICrmObjectType, System.ServiceModel.IClientChannel
     {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
-    public partial class CrmObjectTypeClient : System.ServiceModel.ClientBase<PgCrmObjectTypeService.ICrmObjectType>, PgCrmObjectTypeService.ICrmObjectType
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.1.0")]
+    public partial class CrmObjectTypeClient : System.ServiceModel.ClientBase<PgCrmObjectType.ICrmObjectType>, PgCrmObjectType.ICrmObjectType
     {
         
         /// <summary>
@@ -1377,32 +1377,32 @@ namespace PgCrmObjectTypeService
         {
         }
         
-        public PgCrmObjectTypeService.CrmObjectTypeListInfo GetCrmObjectTypeList(string username, string password, System.Nullable<PgCrmObjectTypeService.CrmObjectTypes> crmObjectTypeIndex)
+        public PgCrmObjectType.CrmObjectTypeListInfo GetCrmObjectTypeList(string username, string password, System.Nullable<PgCrmObjectType.CrmObjectTypes> crmObjectTypeIndex)
         {
             return base.Channel.GetCrmObjectTypeList(username, password, crmObjectTypeIndex);
         }
         
-        public System.Threading.Tasks.Task<PgCrmObjectTypeService.CrmObjectTypeListInfo> GetCrmObjectTypeListAsync(string username, string password, System.Nullable<PgCrmObjectTypeService.CrmObjectTypes> crmObjectTypeIndex)
+        public System.Threading.Tasks.Task<PgCrmObjectType.CrmObjectTypeListInfo> GetCrmObjectTypeListAsync(string username, string password, System.Nullable<PgCrmObjectType.CrmObjectTypes> crmObjectTypeIndex)
         {
             return base.Channel.GetCrmObjectTypeListAsync(username, password, crmObjectTypeIndex);
         }
         
-        public PgCrmObjectTypeService.CrmObjectTypeInfo GetCrmObjectTypeInfo(string username, string password, string typeKeyOrId)
+        public PgCrmObjectType.CrmObjectTypeInfo GetCrmObjectTypeInfo(string username, string password, string typeKeyOrId)
         {
             return base.Channel.GetCrmObjectTypeInfo(username, password, typeKeyOrId);
         }
         
-        public System.Threading.Tasks.Task<PgCrmObjectTypeService.CrmObjectTypeInfo> GetCrmObjectTypeInfoAsync(string username, string password, string typeKeyOrId)
+        public System.Threading.Tasks.Task<PgCrmObjectType.CrmObjectTypeInfo> GetCrmObjectTypeInfoAsync(string username, string password, string typeKeyOrId)
         {
             return base.Channel.GetCrmObjectTypeInfoAsync(username, password, typeKeyOrId);
         }
         
-        public PgCrmObjectTypeService.CardtableResultInfo GetCardtable(string username, string password, string cardtabeHolder, System.Nullable<PgCrmObjectTypeService.ProcessInstanceType> instanceType, string crmObjectTypeKey, System.Nullable<System.Guid> identityId, PgCrmObjectTypeService.SortOperator sortOperator, int pageIndex, int pageSize)
+        public PgCrmObjectType.CardtableResultInfo GetCardtable(string username, string password, string cardtabeHolder, System.Nullable<PgCrmObjectType.ProcessInstanceType> instanceType, string crmObjectTypeKey, System.Nullable<System.Guid> identityId, PgCrmObjectType.SortOperator sortOperator, int pageIndex, int pageSize)
         {
             return base.Channel.GetCardtable(username, password, cardtabeHolder, instanceType, crmObjectTypeKey, identityId, sortOperator, pageIndex, pageSize);
         }
         
-        public System.Threading.Tasks.Task<PgCrmObjectTypeService.CardtableResultInfo> GetCardtableAsync(string username, string password, string cardtabeHolder, System.Nullable<PgCrmObjectTypeService.ProcessInstanceType> instanceType, string crmObjectTypeKey, System.Nullable<System.Guid> identityId, PgCrmObjectTypeService.SortOperator sortOperator, int pageIndex, int pageSize)
+        public System.Threading.Tasks.Task<PgCrmObjectType.CardtableResultInfo> GetCardtableAsync(string username, string password, string cardtabeHolder, System.Nullable<PgCrmObjectType.ProcessInstanceType> instanceType, string crmObjectTypeKey, System.Nullable<System.Guid> identityId, PgCrmObjectType.SortOperator sortOperator, int pageIndex, int pageSize)
         {
             return base.Channel.GetCardtableAsync(username, password, cardtabeHolder, instanceType, crmObjectTypeKey, identityId, sortOperator, pageIndex, pageSize);
         }

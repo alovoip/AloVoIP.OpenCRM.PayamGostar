@@ -1,6 +1,6 @@
 ﻿using PgContractService;
 using PgCrmObjectService;
-using PgCrmObjectTypeService;
+using PgCrmObjectType;
 using PgEPayService;
 using PgIdentityService;
 using PgInvoiceService;
@@ -41,6 +41,14 @@ namespace AloVoIP.OpenCRM.PayamGostar
             basicHttp.MaxReceivedMessageSize = int.MaxValue;
             basicHttp.MaxBufferPoolSize = int.MaxValue;
             basicHttp.MaxBufferSize = int.MaxValue;
+                       
+            basicHttp.ReaderQuotas.MaxStringContentLength = int.MaxValue;
+            basicHttp.ReaderQuotas.MaxDepth = int.MaxValue;
+            basicHttp.ReaderQuotas.MaxArrayLength = int.MaxValue;
+            basicHttp.ReaderQuotas.MaxBytesPerRead = 4096;
+            basicHttp.ReaderQuotas.MaxNameTableCharCount = int.MaxValue;
+
+
             basicHttp.ReceiveTimeout = TimeSpan.FromSeconds(20);
 
             return new ChannelFactory<TContract>(basicHttp, serviceEP);

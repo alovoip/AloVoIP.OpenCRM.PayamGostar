@@ -1,6 +1,6 @@
 ﻿using AloVoIP.OpenCRM.Requests;
 using AloVoIP.OpenCRM.Responses;
-using PgCrmObjectTypeService;
+using PgCrmObjectType;
 using PgIdentityService;
 using PgUserService;
 using Septa.PayamGostarApiClient.CrmObject.ExtendedProperty;
