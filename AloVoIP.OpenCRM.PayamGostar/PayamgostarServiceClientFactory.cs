@@ -67,7 +67,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
                     { typeof(ICrmObjectChannel), "/services/api/ICrmObject.svc"},
                     { typeof(ICrmObjectTypeChannel), "/services/api/ICrmObjectType.svc"},
                     { typeof(IEpayChannel), "/services/api/IEpay.svc"},
-                    { typeof(IInvoice), "/services/api/IInvoice.svc"},
+                    { typeof(IInvoiceChannel), "/services/api/IInvoice.svc"},
                     { typeof(IMoneyAccountChannel), "/services/api/IMoneyAccount.svc"},
                 }.First(x => x.Key == typeof(TContract)).Value;
             }

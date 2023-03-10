@@ -105,9 +105,15 @@ namespace AloVoIP.OpenCRM.PayamGostar
                     else
                     {
                         decimal res = 0;
-                        var contractInfoType = invoice.GetType();
-                        if (decimal.TryParse(contractInfoType.GetProperty(valueFieldKey).GetValue(invoice).ToString(), out res))
-                            paymentResponse.Amount = res;
+                        var invoinceByLookupField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == lookupNumberFieldKey);
+                        if (invoinceByLookupField != null)
+                        {
+                            var invoinceByValueField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == valueFieldKey);
+                            if (decimal.TryParse(invoinceByValueField.Value.ToString(), out res))
+                            {
+                                paymentResponse.Amount = res;
+                            }
+                        }
                     }
                 }
 
