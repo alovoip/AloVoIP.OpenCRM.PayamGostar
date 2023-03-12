@@ -5,6 +5,7 @@ using PgEPayService;
 using PgIdentityService;
 using PgInvoiceService;
 using PgMoneyAccountService;
+using PgPaymentService;
 using PgUserService;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ using System.ServiceModel;
 namespace AloVoIP.OpenCRM.PayamGostar
 {
     public class PayamgostarServiceClientFactory<TContract>
-    {        
+    {
         public TContract Create(string endPointAddress)
         {
             string uri = $"{endPointAddress}{ServicePathLocation}";
@@ -41,7 +42,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
             basicHttp.MaxReceivedMessageSize = int.MaxValue;
             basicHttp.MaxBufferPoolSize = int.MaxValue;
             basicHttp.MaxBufferSize = int.MaxValue;
-                       
+
             basicHttp.ReaderQuotas.MaxStringContentLength = int.MaxValue;
             basicHttp.ReaderQuotas.MaxDepth = int.MaxValue;
             basicHttp.ReaderQuotas.MaxArrayLength = int.MaxValue;
@@ -69,6 +70,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
                     { typeof(IEpayChannel), "/services/api/IEpay.svc"},
                     { typeof(IInvoiceChannel), "/services/api/IInvoice.svc"},
                     { typeof(IMoneyAccountChannel), "/services/api/IMoneyAccount.svc"},
+                    { typeof(IPaymentChannel), "/services/api/IPayment.svc"},
                 }.First(x => x.Key == typeof(TContract)).Value;
             }
         }

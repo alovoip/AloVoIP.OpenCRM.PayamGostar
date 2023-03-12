@@ -10,6 +10,7 @@ using PgEPayService;
 using PgIdentityService;
 using PgInvoiceService;
 using PgMoneyAccountService;
+using PgPaymentService;
 using PgUserService;
 using Serilog;
 using System;
@@ -55,12 +56,437 @@ namespace AloVoIP.OpenCRM.PayamGostar
         public IInvoiceChannel CreateInvoiceClient()
         {
             return new PayamgostarServiceClientFactory<IInvoiceChannel>().Create(Host);
+        }  
+        public IPaymentChannel CreatePaymnetClient()
+        {
+            return new PayamgostarServiceClientFactory<IPaymentChannel>().Create(Host);
         }
         public IMoneyAccountChannel CreateMoneyAccountClient()
         {
             return new PayamgostarServiceClientFactory<IMoneyAccountChannel>().Create(Host);
         }
+        private PaymentResponse GetReceiptInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
+        {
+            PaymentResponse paymentResponse = null;
+            var query = string.Empty;
 
+            if (customerRequest != null)
+            {
+                Guid customerId;
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
+                {
+                    query = $"IdentityId==\"{customerId}\" & ";
+                }
+            }
+
+            if (string.IsNullOrEmpty(lookupNumberFieldKey))
+            {
+                query = $"Number==\"{billableObjectNumber}\"";
+            }
+            else
+            {
+                query = $"{lookupNumberFieldKey}==\"{billableObjectNumber}\"";
+            }
+
+            using (var paymentChannel = CreatePaymnetClient())
+            {
+                var paymentInfoResult = paymentChannel.SearchReceipt(Username,
+                                                                     Password,
+                                                                     billableObjectTypeKey,
+                                                                     query);
+                if (paymentInfoResult.Success &&
+                    paymentInfoResult.PaymentInfoList != null &&
+                    paymentInfoResult.PaymentInfoList.Length > 0)
+                {
+                    var payment = paymentInfoResult.PaymentInfoList[0];
+
+
+                    paymentResponse = new PaymentResponse();
+                    if (payment.IdentityId.HasValue)
+                        paymentResponse.IdentityId = payment.IdentityId.Value.ToString();
+
+                    if (string.IsNullOrEmpty(valueFieldKey))
+                    {
+                        paymentResponse.Amount = payment.FinalValue;
+                    }
+                    else
+                    {
+                        decimal res = 0;
+                        var invoinceByLookupField = payment.ExtendedProperties.FirstOrDefault(x => x.UserKey == lookupNumberFieldKey);
+                        if (invoinceByLookupField != null)
+                        {
+                            var invoinceByValueField = payment.ExtendedProperties.FirstOrDefault(x => x.UserKey == valueFieldKey);
+                            if (decimal.TryParse(invoinceByValueField.Value.ToString(), out res))
+                            {
+                                paymentResponse.Amount = res;
+                            }
+                        }
+                    }
+                }
+
+                return paymentResponse;
+            }
+        }
+        private PaymentResponse GetPaymentResultInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
+        {
+            PaymentResponse paymentResponse = null;
+            var query = string.Empty;
+
+            if (customerRequest != null)
+            {
+                Guid customerId;
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
+                {
+                    query = $"IdentityId==\"{customerId}\" & ";
+                }
+            }
+
+            if (string.IsNullOrEmpty(lookupNumberFieldKey))
+            {
+                query = $"Number==\"{billableObjectNumber}\"";
+            }
+            else
+            {
+                query = $"{lookupNumberFieldKey}==\"{billableObjectNumber}\"";
+            }
+
+            using (var paymentChannel = CreatePaymnetClient())
+            {
+                var paymentInfoResult = paymentChannel.SearchPayment(Username,
+                                                                     Password,
+                                                                     billableObjectTypeKey,
+                                                                     query);
+                if (paymentInfoResult.Success &&
+                    paymentInfoResult.PaymentInfoList != null &&
+                    paymentInfoResult.PaymentInfoList.Length > 0)
+                {
+                    var payment = paymentInfoResult.PaymentInfoList[0];
+
+
+                    paymentResponse = new PaymentResponse();
+                    if (payment.IdentityId.HasValue)
+                        paymentResponse.IdentityId = payment.IdentityId.Value.ToString();
+
+                    if (string.IsNullOrEmpty(valueFieldKey))
+                    {
+                        paymentResponse.Amount = payment.FinalValue;
+                    }
+                    else
+                    {
+                        decimal res = 0;
+                        var invoinceByLookupField = payment.ExtendedProperties.FirstOrDefault(x => x.UserKey == lookupNumberFieldKey);
+                        if (invoinceByLookupField != null)
+                        {
+                            var invoinceByValueField = payment.ExtendedProperties.FirstOrDefault(x => x.UserKey == valueFieldKey);
+                            if (decimal.TryParse(invoinceByValueField.Value.ToString(), out res))
+                            {
+                                paymentResponse.Amount = res;
+                            }
+                        }
+                    }
+                }
+
+                return paymentResponse;
+            }
+        }
+        private PaymentResponse GetQuoteInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
+        {
+            PaymentResponse paymentResponse = null;
+            var query = string.Empty;
+
+            if (customerRequest != null)
+            {
+                Guid customerId;
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
+                {
+                    query = $"IdentityId==\"{customerId}\" & ";
+                }
+            }
+
+            // LookupNumberFieldKey
+            if (string.IsNullOrEmpty(lookupNumberFieldKey))
+                query = $"Number==\"{billableObjectNumber}\"";
+            else
+                query = $"{lookupNumberFieldKey}==\"{billableObjectNumber}\"";
+
+            using (var invoiceChannel = CreateInvoiceClient())
+            {
+                var invoiceInfoResult = invoiceChannel.SearchQuote(Username,
+                                                                     Password,
+                                                                     billableObjectTypeKey,
+                                                                     query);
+                if (invoiceInfoResult.Success &&
+                    invoiceInfoResult.InvoiceInfoList != null &&
+                    invoiceInfoResult.InvoiceInfoList.Length > 0)
+                {
+                    var invoice = invoiceInfoResult.InvoiceInfoList[0];
+
+
+                    paymentResponse = new PaymentResponse();
+                    if (invoice.IdentityId.HasValue)
+                        paymentResponse.IdentityId = invoice.IdentityId.Value.ToString();
+
+                    if (string.IsNullOrEmpty(valueFieldKey))
+                    {
+                        paymentResponse.Amount = invoice.FinalValue;
+                    }
+                    else
+                    {
+                        decimal res = 0;
+                        var invoinceByLookupField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == lookupNumberFieldKey);
+                        if (invoinceByLookupField != null)
+                        {
+                            var invoinceByValueField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == valueFieldKey);
+                            if (decimal.TryParse(invoinceByValueField.Value.ToString(), out res))
+                            {
+                                paymentResponse.Amount = res;
+                            }
+                        }
+                    }
+                }
+
+                return paymentResponse;
+            }
+        }
+        private PaymentResponse GetPurchaseInvoiceInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
+        {
+            PaymentResponse paymentResponse = null;
+            var query = string.Empty;
+
+            if (customerRequest != null)
+            {
+                Guid customerId;
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
+                {
+                    query = $"IdentityId==\"{customerId}\" & ";
+                }
+            }
+
+            // LookupNumberFieldKey
+            if (string.IsNullOrEmpty(lookupNumberFieldKey))
+                query = $"Number==\"{billableObjectNumber}\"";
+            else
+                query = $"{lookupNumberFieldKey}==\"{billableObjectNumber}\"";
+
+            using (var invoiceChannel = CreateInvoiceClient())
+            {
+                var invoiceInfoResult = invoiceChannel.SearchPurchaseInvoice(Username,
+                                                                     Password,
+                                                                     billableObjectTypeKey,
+                                                                     query);
+                if (invoiceInfoResult.Success &&
+                    invoiceInfoResult.InvoiceInfoList != null &&
+                    invoiceInfoResult.InvoiceInfoList.Length > 0)
+                {
+                    var invoice = invoiceInfoResult.InvoiceInfoList[0];
+
+
+                    paymentResponse = new PaymentResponse();
+                    if (invoice.IdentityId.HasValue)
+                        paymentResponse.IdentityId = invoice.IdentityId.Value.ToString();
+
+                    if (string.IsNullOrEmpty(valueFieldKey))
+                    {
+                        paymentResponse.Amount = invoice.FinalValue;
+                    }
+                    else
+                    {
+                        decimal res = 0;
+                        var invoinceByLookupField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == lookupNumberFieldKey);
+                        if (invoinceByLookupField != null)
+                        {
+                            var invoinceByValueField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == valueFieldKey);
+                            if (decimal.TryParse(invoinceByValueField.Value.ToString(), out res))
+                            {
+                                paymentResponse.Amount = res;
+                            }
+                        }
+                    }
+                }
+
+                return paymentResponse;
+            }
+        }
+        private PaymentResponse GetReturnPurchaseInvoiceInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
+        {
+            PaymentResponse paymentResponse = null;
+            var query = string.Empty;
+
+            if (customerRequest != null)
+            {
+                Guid customerId;
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
+                {
+                    query = $"IdentityId==\"{customerId}\" & ";
+                }
+            }
+
+            // LookupNumberFieldKey
+            if (string.IsNullOrEmpty(lookupNumberFieldKey))
+                query = $"Number==\"{billableObjectNumber}\"";
+            else
+                query = $"{lookupNumberFieldKey}==\"{billableObjectNumber}\"";
+
+            using (var invoiceChannel = CreateInvoiceClient())
+            {
+                var invoiceInfoResult = invoiceChannel.SearchReturnPurchaseInvoice(Username,
+                                                                     Password,
+                                                                     billableObjectTypeKey,
+                                                                     query);
+                if (invoiceInfoResult.Success &&
+                    invoiceInfoResult.InvoiceInfoList != null &&
+                    invoiceInfoResult.InvoiceInfoList.Length > 0)
+                {
+                    var invoice = invoiceInfoResult.InvoiceInfoList[0];
+
+
+                    paymentResponse = new PaymentResponse();
+                    if (invoice.IdentityId.HasValue)
+                        paymentResponse.IdentityId = invoice.IdentityId.Value.ToString();
+
+                    if (string.IsNullOrEmpty(valueFieldKey))
+                    {
+                        paymentResponse.Amount = invoice.FinalValue;
+                    }
+                    else
+                    {
+                        decimal res = 0;
+                        var invoinceByLookupField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == lookupNumberFieldKey);
+                        if (invoinceByLookupField != null)
+                        {
+                            var invoinceByValueField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == valueFieldKey);
+                            if (decimal.TryParse(invoinceByValueField.Value.ToString(), out res))
+                            {
+                                paymentResponse.Amount = res;
+                            }
+                        }
+                    }
+                }
+
+                return paymentResponse;
+            }
+        }
+        private PaymentResponse GetReturnSaleInvoiceInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
+        {
+            PaymentResponse paymentResponse = null;
+            var query = string.Empty;
+
+            if (customerRequest != null)
+            {
+                Guid customerId;
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
+                {
+                    query = $"IdentityId==\"{customerId}\" & ";
+                }
+            }
+
+            // LookupNumberFieldKey
+            if (string.IsNullOrEmpty(lookupNumberFieldKey))
+                query = $"Number==\"{billableObjectNumber}\"";
+            else
+                query = $"{lookupNumberFieldKey}==\"{billableObjectNumber}\"";
+
+            using (var invoiceChannel = CreateInvoiceClient())
+            {
+                var invoiceInfoResult = invoiceChannel.SearchReturnSaleInvoice(Username,
+                                                                     Password,
+                                                                     billableObjectTypeKey,
+                                                                     query);
+                if (invoiceInfoResult.Success &&
+                    invoiceInfoResult.InvoiceInfoList != null &&
+                    invoiceInfoResult.InvoiceInfoList.Length > 0)
+                {
+                    var invoice = invoiceInfoResult.InvoiceInfoList[0];
+
+
+                    paymentResponse = new PaymentResponse();
+                    if (invoice.IdentityId.HasValue)
+                        paymentResponse.IdentityId = invoice.IdentityId.Value.ToString();
+
+                    if (string.IsNullOrEmpty(valueFieldKey))
+                    {
+                        paymentResponse.Amount = invoice.FinalValue;
+                    }
+                    else
+                    {
+                        decimal res = 0;
+                        var invoinceByLookupField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == lookupNumberFieldKey);
+                        if (invoinceByLookupField != null)
+                        {
+                            var invoinceByValueField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == valueFieldKey);
+                            if (decimal.TryParse(invoinceByValueField.Value.ToString(), out res))
+                            {
+                                paymentResponse.Amount = res;
+                            }
+                        }
+                    }
+                }
+
+                return paymentResponse;
+            }
+        }
+        private PaymentResponse GetPurchaseQuoteInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
+        {
+            PaymentResponse paymentResponse = null;
+            var query = string.Empty;
+
+            if (customerRequest != null)
+            {
+                Guid customerId;
+                if (Guid.TryParse(customerRequest.CustomerId, out customerId))
+                {
+                    query = $"IdentityId==\"{customerId}\" & ";
+                }
+            }
+
+            if (string.IsNullOrEmpty(lookupNumberFieldKey))
+            {
+                query = $"Number==\"{billableObjectNumber}\"";
+            }
+            else
+            {
+                query = $"{lookupNumberFieldKey}==\"{billableObjectNumber}\"";
+            }
+
+            using (var invoiceChannel = CreateInvoiceClient())
+            {
+                var invoiceInfoResult = invoiceChannel.SearchPurchaseQuote(Username,
+                                                                     Password,
+                                                                     billableObjectTypeKey,
+                                                                     query);
+                if (invoiceInfoResult.Success &&
+                    invoiceInfoResult.InvoiceInfoList != null &&
+                    invoiceInfoResult.InvoiceInfoList.Length > 0)
+                {
+                    var invoice = invoiceInfoResult.InvoiceInfoList[0];
+
+
+                    paymentResponse = new PaymentResponse();
+                    if (invoice.IdentityId.HasValue)
+                        paymentResponse.IdentityId = invoice.IdentityId.Value.ToString();
+
+                    if (string.IsNullOrEmpty(valueFieldKey))
+                    {
+                        paymentResponse.Amount = invoice.FinalValue;
+                    }
+                    else
+                    {
+                        decimal res = 0;
+                        var invoinceByLookupField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == lookupNumberFieldKey);
+                        if (invoinceByLookupField != null)
+                        {
+                            var invoinceByValueField = invoice.ExtendedProperties.FirstOrDefault(x => x.UserKey == valueFieldKey);
+                            if (decimal.TryParse(invoinceByValueField.Value.ToString(), out res))
+                            {
+                                paymentResponse.Amount = res;
+                            }
+                        }
+                    }
+                }
+
+                return paymentResponse;
+            }
+        }
         private PaymentResponse GetInvoiceInfo(CustomerRequest customerRequest, string billableObjectTypeKey, string billableObjectNumber, string lookupNumberFieldKey, string valueFieldKey)
         {
             PaymentResponse paymentResponse = null;
@@ -163,9 +589,15 @@ namespace AloVoIP.OpenCRM.PayamGostar
                     else
                     {
                         decimal res = 0;
-                        var contractInfoType = contractInfoResult.ContractInfoList[0].GetType();
-                        if (decimal.TryParse(contractInfoType.GetProperty(valueFieldKey).GetValue(contractInfoResult.ContractInfoList[0]).ToString(), out res))
-                            paymentResponse.Amount = res;
+                        var invoinceByLookupField = contractInfoResult.ContractInfoList[0].ExtendedProperties.FirstOrDefault(x => x.UserKey == lookupNumberFieldKey);
+                        if (invoinceByLookupField != null)
+                        {
+                            var invoinceByValueField = contractInfoResult.ContractInfoList[0].ExtendedProperties.FirstOrDefault(x => x.UserKey == valueFieldKey);
+                            if (decimal.TryParse(invoinceByValueField.Value.ToString(), out res))
+                            {
+                                paymentResponse.Amount = res;
+                            }
+                        }
                     }
                 }
 
@@ -623,9 +1055,21 @@ namespace AloVoIP.OpenCRM.PayamGostar
                                                       paymentInfoRequest.ValueFieldKey);
                                 return await Task.FromResult(new PaymentResponse { Amount = invoiceResult.Amount, IdentityId = invoiceResult.IdentityId });
                             case CrmObjectTypes.Quote:
-                                break;
+                                var quoteResult = GetQuoteInfo(paymentInfoRequest.CustomerRequest,
+                                                    paymentInfoRequest.BillableObjectTypeKey,
+                                                    paymentInfoRequest.BillableObjectNumber,
+                                                    paymentInfoRequest.LookupNumberFieldKey,
+                                                    paymentInfoRequest.ValueFieldKey);
+                                return await Task.FromResult(new PaymentResponse { Amount = quoteResult.Amount, IdentityId = quoteResult.IdentityId });
+
                             case CrmObjectTypes.Receipt:
-                                break;
+                                var receiptResult = GetReceiptInfo(paymentInfoRequest.CustomerRequest,
+                                                   paymentInfoRequest.BillableObjectTypeKey,
+                                                   paymentInfoRequest.BillableObjectNumber,
+                                                   paymentInfoRequest.LookupNumberFieldKey,
+                                                   paymentInfoRequest.ValueFieldKey);
+                                return await Task.FromResult(new PaymentResponse { Amount = receiptResult.Amount, IdentityId = receiptResult.IdentityId });
+
                             case CrmObjectTypes.Contract:
                                 var contractResult = GetContractInfo(paymentInfoRequest.CustomerRequest,
                                                        paymentInfoRequest.BillableObjectTypeKey,
@@ -634,15 +1078,45 @@ namespace AloVoIP.OpenCRM.PayamGostar
                                                        paymentInfoRequest.ValueFieldKey);
                                 return await Task.FromResult(new PaymentResponse { Amount = contractResult.Amount, IdentityId = contractResult.IdentityId });
                             case CrmObjectTypes.PurchaseInvoice:
-                                break;
+                                var purchaseInvoiceResult = GetPurchaseInvoiceInfo(paymentInfoRequest.CustomerRequest,
+                                                    paymentInfoRequest.BillableObjectTypeKey,
+                                                    paymentInfoRequest.BillableObjectNumber,
+                                                    paymentInfoRequest.LookupNumberFieldKey,
+                                                    paymentInfoRequest.ValueFieldKey);
+                                return await Task.FromResult(new PaymentResponse { Amount = purchaseInvoiceResult.Amount, IdentityId = purchaseInvoiceResult.IdentityId });
+
                             case CrmObjectTypes.ReturnPurchaseInvoice:
-                                break;
+                                var returnPurchaseInvoiceResult = GetReturnPurchaseInvoiceInfo(paymentInfoRequest.CustomerRequest,
+                                                   paymentInfoRequest.BillableObjectTypeKey,
+                                                   paymentInfoRequest.BillableObjectNumber,
+                                                   paymentInfoRequest.LookupNumberFieldKey,
+                                                   paymentInfoRequest.ValueFieldKey);
+                                return await Task.FromResult(new PaymentResponse { Amount = returnPurchaseInvoiceResult.Amount, IdentityId = returnPurchaseInvoiceResult.IdentityId });
+
                             case CrmObjectTypes.ReturnSaleInvoice:
-                                break;
+                                var returnSaleInvoiceResult = GetReturnSaleInvoiceInfo(paymentInfoRequest.CustomerRequest,
+                                                 paymentInfoRequest.BillableObjectTypeKey,
+                                                 paymentInfoRequest.BillableObjectNumber,
+                                                 paymentInfoRequest.LookupNumberFieldKey,
+                                                 paymentInfoRequest.ValueFieldKey);
+                                return await Task.FromResult(new PaymentResponse { Amount = returnSaleInvoiceResult.Amount, IdentityId = returnSaleInvoiceResult.IdentityId });
+
                             case CrmObjectTypes.PurchaseQuote:
-                                break;
+                                var purchaseQuoteResult = GetPurchaseQuoteInfo(paymentInfoRequest.CustomerRequest,
+                                                paymentInfoRequest.BillableObjectTypeKey,
+                                                paymentInfoRequest.BillableObjectNumber,
+                                                paymentInfoRequest.LookupNumberFieldKey,
+                                                paymentInfoRequest.ValueFieldKey);
+                                return await Task.FromResult(new PaymentResponse { Amount = purchaseQuoteResult.Amount, IdentityId = purchaseQuoteResult.IdentityId });
+
                             case CrmObjectTypes.Payment:
-                                break;
+                                var paymentResult = GetPaymentResultInfo(paymentInfoRequest.CustomerRequest,
+                                               paymentInfoRequest.BillableObjectTypeKey,
+                                               paymentInfoRequest.BillableObjectNumber,
+                                               paymentInfoRequest.LookupNumberFieldKey,
+                                               paymentInfoRequest.ValueFieldKey);
+                                return await Task.FromResult(new PaymentResponse { Amount = paymentResult.Amount, IdentityId = paymentResult.IdentityId });
+
                         }
                     }
                 }
