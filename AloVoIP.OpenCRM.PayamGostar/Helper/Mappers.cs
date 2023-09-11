@@ -5,6 +5,7 @@ using PgIdentityService;
 using PgUserService;
 using Septa.PayamGostarApiClient.CrmObject.ExtendedProperty;
 using Septa.PayamGostarApiClient.Invoice.SalesInvoice;
+using SeptaKit.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

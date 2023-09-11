@@ -1,6 +1,7 @@
 ﻿using AloVoIP.OpenCRM.PayamGostar.Helper;
 using AloVoIP.OpenCRM.Requests;
 using AloVoIP.OpenCRM.Responses;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PgContractService;
@@ -12,7 +13,6 @@ using PgInvoiceService;
 using PgMoneyAccountService;
 using PgPaymentService;
 using PgUserService;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,8 +24,8 @@ namespace AloVoIP.OpenCRM.PayamGostar
 {
     public class PayamgostarLookupSourceService : PayamGostarCallStoreService, ILookupSourceService
     {
-        public PayamgostarLookupSourceService(string lookupSourceId, string host, string username, string password)
-            : base(lookupSourceId, host, username, password)
+        public PayamgostarLookupSourceService(string lookupSourceId, string host, string username, string password, ILoggerFactory loggerFactory)
+            : base(lookupSourceId, host, username, password, loggerFactory)
         {
         }
 
@@ -33,19 +33,19 @@ namespace AloVoIP.OpenCRM.PayamGostar
         {
             return new PayamgostarServiceClientFactory<ICrmObjectTypeChannel>().Create(Host);
         }
-        public ICrmObjectChannel CreateCrmObjectChannelClient()
+        public ICrmObjectChannel CreateCrmObjectClient()
         {
             return new PayamgostarServiceClientFactory<ICrmObjectChannel>().Create(Host);
         }
-        public IIdentityChannel CreateIdentityChannelClient()
+        public IIdentityChannel CreateIdentityClient()
         {
             return new PayamgostarServiceClientFactory<IIdentityChannel>().Create(Host);
         }
-        public IUserChannel CreateUserChannelClient()
+        public IUserChannel CreateUserClient()
         {
             return new PayamgostarServiceClientFactory<IUserChannel>().Create(Host);
         }
-        public IContractChannel CreateContractChannelClient()
+        public IContractChannel CreateContractClient()
         {
             return new PayamgostarServiceClientFactory<IContractChannel>().Create(Host);
         }
@@ -567,7 +567,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
             else
                 query = $"{lookupNumberFieldKey}==\"{billableObjectNumber}\"";
 
-            using (var contractChannel = CreateContractChannelClient())
+            using (var contractChannel = CreateContractClient())
             {
                 var contractInfoResult = contractChannel.SearchContract(Username,
                                                                         Password,
@@ -644,7 +644,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in GetBillableObjectTypes.");
+                _logger.LogError(ex, "Error in GetBillableObjectTypes.");
             }
 
             return null;
@@ -676,7 +676,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in GetMoneyAccounts");
+                _logger.LogError(ex, "Error in GetMoneyAccounts");
             }
 
             return null;
@@ -688,7 +688,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
                 Guid customerId;
                 if (Guid.TryParse(customerRequest.CustomerId, out customerId))
                 {
-                    using (var identityChannel = CreateIdentityChannelClient())
+                    using (var identityChannel = CreateIdentityClient())
                     {
                         return await Task.FromResult(identityChannel.FindIdentityById(Username, Password, customerId).IdentityInfo.ToDto());
                     }
@@ -700,34 +700,34 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in GetIdentityByCustomerInfo. customerRequest: {@customerRequest}", customerRequest);
+                _logger.LogError(ex, "Error in GetIdentityByCustomerInfo. customerRequest: {@customerRequest}", customerRequest);
             }
 
-            Log.Debug("GetIdentityByCustomerInfo result is null. {@customerRequest}", customerRequest);
+            _logger.LogDebug("GetIdentityByCustomerInfo result is null. {@customerRequest}", customerRequest);
             return null;
         }
         public Task<IdentityResponse> GetIdentityByPhoneNumber(IdentityByPhoneNumberRequest identityByPhoneNumberRequest)
         {
             try
             {
-                using (var identityChannel = CreateIdentityChannelClient())
+                using (var identityChannel = CreateIdentityClient())
                 {
                     return Task.FromResult(identityChannel.FindIdentityByPhoneNumber(Username, Password, identityByPhoneNumberRequest.PhoneNumber).IdentityInfo.ToDto());
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error in GetIdentityByPhoneNumber. phoneNumber:{identityByPhoneNumberRequest.PhoneNumber}");
+                _logger.LogError(ex, $"Error in GetIdentityByPhoneNumber. phoneNumber:{identityByPhoneNumberRequest.PhoneNumber}");
             }
 
-            Log.Debug($"GetIdentityByPhoneNumber, FindIdentityByPhoneNumber result is null. {nameof(identityByPhoneNumberRequest.PhoneNumber)}:{identityByPhoneNumberRequest.PhoneNumber}");
+            _logger.LogDebug($"GetIdentityByPhoneNumber, FindIdentityByPhoneNumber result is null. {nameof(identityByPhoneNumberRequest.PhoneNumber)}:{identityByPhoneNumberRequest.PhoneNumber}");
             return null;
         }
         public async Task<IdentityResponse> GetIdentityByCustomerNumber(IdentityByCustomerNumberRequest identityByCustomerNumberRequest)
         {
             try
             {
-                using (var identityChannel = CreateIdentityChannelClient())
+                using (var identityChannel = CreateIdentityClient())
                 {
                     var result = identityChannel.SearchIdentity(Username, Password, string.Empty,
                         $"CustomerNumber==\"{identityByCustomerNumberRequest.CustomerNumber}\"");
@@ -735,7 +735,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
                     {
                         if (result.IdentityInfoList.Length == 0)
                         {
-                            Log.Debug($"GetIdentityByCustomerNumber, SearchIdentity result is success but identityInfoList is empty." +
+                            _logger.LogDebug($"GetIdentityByCustomerNumber, SearchIdentity result is success but identityInfoList is empty." +
                                 $" {nameof(identityByCustomerNumberRequest.CustomerNumber)}:{identityByCustomerNumberRequest.CustomerNumber}");
                             return null;
                         }
@@ -746,23 +746,23 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error in GetIdentityByCustomerNumber. customerNumber:{identityByCustomerNumberRequest.CustomerNumber}");
+                _logger.LogError(ex, $"Error in GetIdentityByCustomerNumber. customerNumber:{identityByCustomerNumberRequest.CustomerNumber}");
             }
 
-            Log.Debug($"GetIdentityByCustomerNumber, SearchIdentity result is null. {nameof(identityByCustomerNumberRequest.CustomerNumber)}:{identityByCustomerNumberRequest.CustomerNumber}");
+            _logger.LogDebug($"GetIdentityByCustomerNumber, SearchIdentity result is null. {nameof(identityByCustomerNumberRequest.CustomerNumber)}:{identityByCustomerNumberRequest.CustomerNumber}");
             return null;
         }
         public async Task<IdentityHasValidContractResponse> IdentityHasValidContract(IdentityHasValidContractRequest identityHasValidContractRequest)
         {
             try
             {
-                using (var contractChannel = CreateContractChannelClient())
+                using (var contractChannel = CreateContractClient())
                 {
                     var contracts = contractChannel.SearchContract(Username, Password, identityHasValidContractRequest.ContractKey,
                         $"IdentityId==\"{identityHasValidContractRequest.CustomerRequest.CustomerId}\"");
                     if (!contracts.Success)
                     {
-                        Log.Debug("IdentityHasValidContract, SearchContract result is not success. customerInfo:{@customerInfo}, contractKey:{contractKey}",
+                        _logger.LogDebug("IdentityHasValidContract, SearchContract result is not success. customerInfo:{@customerInfo}, contractKey:{contractKey}",
                             identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
                         return await Task.FromResult(new IdentityHasValidContractResponse { IsValid = false });
                     }
@@ -779,7 +779,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
                                 }
                                 else
                                 {
-                                    Log.Debug("IdentityHasValidContract, SearchContract found but BillableObjectState is not 'User.GeneralPropertyItem.BillableObjectState_2' or 'تایید و شماره گذاری شده'. customerInfo:{@customerInfo}, contractKey:{@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
+                                    _logger.LogDebug("IdentityHasValidContract, SearchContract found but BillableObjectState is not 'User.GeneralPropertyItem.BillableObjectState_2' or 'تایید و شماره گذاری شده'. customerInfo:{@customerInfo}, contractKey:{@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
                                 }
                             }
                         }
@@ -789,55 +789,55 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in IdentityHasValidContract. customerInfo: {@customerInfo}, contractKey: {@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
+                _logger.LogError(ex, "Error in IdentityHasValidContract. customerInfo: {@customerInfo}, contractKey: {@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
             }
 
-            Log.Debug("IdentityHasValidContract result is false. customerInfo:{@customerInfo}, contractKey:{@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
+            _logger.LogDebug("IdentityHasValidContract result is false. customerInfo:{@customerInfo}, contractKey:{@contractKey}", identityHasValidContractRequest.CustomerRequest, identityHasValidContractRequest.ContractKey);
             return await Task.FromResult(new IdentityHasValidContractResponse { IsValid = false });
         }
         public async Task<UserResponse> GetUserInfoByIdentityId(UserInfoByIdentityRequest userInfoByIdentityRequest)
         {
             try
             {
-                using (var userChannel = CreateUserChannelClient())
+                using (var userChannel = CreateUserClient())
                 {
                     return await Task.FromResult(userChannel.GetUserByIdentityId(Username, Password, new Guid(userInfoByIdentityRequest.IdentityId)).ToDto());
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in GetUserInfoByIdentityInfo. identityId: {identityId}", userInfoByIdentityRequest.IdentityId);
+                _logger.LogError(ex, "Error in GetUserInfoByIdentityInfo. identityId: {identityId}", userInfoByIdentityRequest.IdentityId);
             }
 
-            Log.Debug("GetUserInfoByIdentityInfo, GetUserByIdentityId result is null. {identityId}", userInfoByIdentityRequest.IdentityId);
+            _logger.LogDebug("GetUserInfoByIdentityInfo, GetUserByIdentityId result is null. {identityId}", userInfoByIdentityRequest.IdentityId);
             return null;
         }
         public async Task<UserTelephonySystemResponse> GetUserExtensions(UserExtensionsRequest userExtenstionsRequest)
         {
-            Log.Debug($"GetUserExtensions. username:{userExtenstionsRequest.Username}");
+            _logger.LogDebug($"GetUserExtensions. username:{userExtenstionsRequest.Username}");
 
             try
             {
-                using (var userChannel = CreateUserChannelClient())
+                using (var userChannel = CreateUserClient())
                 {
                     return await Task.FromResult(userChannel.GetUserExtensions(Username, Password, userExtenstionsRequest.Username).ToDto());
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error in GetUserExtensions. username:{userExtenstionsRequest.Username}");
+                _logger.LogError(ex, $"Error in GetUserExtensions. username:{userExtenstionsRequest.Username}");
             }
 
-            Log.Debug($"GetUserExtensions, GetUserExtensions result is null. {nameof(userExtenstionsRequest.Username)}:{userExtenstionsRequest.Username}");
+            _logger.LogDebug($"GetUserExtensions, GetUserExtensions result is null. {nameof(userExtenstionsRequest.Username)}:{userExtenstionsRequest.Username}");
             return null;
         }
         public async Task<UserExtensionResponse> GetUserDefaultExtension(UserExtensionRequest userExtensionRequest)
         {
-            Log.Debug($"GetUserDefaultExtension. username:{userExtensionRequest.Username}, telephonySystemKey:{userExtensionRequest.TelephonySystemKey}");
+            _logger.LogDebug($"GetUserDefaultExtension. username:{userExtensionRequest.Username}, telephonySystemKey:{userExtensionRequest.TelephonySystemKey}");
 
             try
             {
-                using (var userChannel = CreateUserChannelClient())
+                using (var userChannel = CreateUserClient())
                 {
                     var userTelephonySystemInfo = userChannel.GetUserExtensions(Username, Password, userExtensionRequest.Username);
                     if (userTelephonySystemInfo != null &&
@@ -854,35 +854,35 @@ namespace AloVoIP.OpenCRM.PayamGostar
                             }
                             else
                             {
-                                Log.Debug($"GetUserDefaultExtension, TelephonySystem extension is null or empty.");
+                                _logger.LogDebug($"GetUserDefaultExtension, TelephonySystem extension is null or empty.");
                             }
                         }
                         else
                         {
-                            Log.Debug($"GetUserDefaultExtension, TelephonySystem is not found with the given key.");
+                            _logger.LogDebug($"GetUserDefaultExtension, TelephonySystem is not found with the given key.");
                         }
                     }
                     else
                     {
-                        Log.Debug($"GetUserDefaultExtension, UserTelephonySystemInfo is null or empty.");
+                        _logger.LogDebug($"GetUserDefaultExtension, UserTelephonySystemInfo is null or empty.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error in GetUserDefaultExtension, username:{userExtensionRequest.Username}, telephonySystemKey:{userExtensionRequest.TelephonySystemKey}");
+                _logger.LogError(ex, $"Error in GetUserDefaultExtension, username:{userExtensionRequest.Username}, telephonySystemKey:{userExtensionRequest.TelephonySystemKey}");
             }
 
-            Log.Debug($"GetUserExtenstion, GetUserDefaultExtension result is empty. {nameof(userExtensionRequest.Username)}:{userExtensionRequest.Username}, {nameof(userExtensionRequest.TelephonySystemKey)}:{userExtensionRequest.TelephonySystemKey}");
+            _logger.LogDebug($"GetUserExtenstion, GetUserDefaultExtension result is empty. {nameof(userExtensionRequest.Username)}:{userExtensionRequest.Username}, {nameof(userExtensionRequest.TelephonySystemKey)}:{userExtensionRequest.TelephonySystemKey}");
             return null;
         }
         public async Task<UserExtensionResponse> GetUserManagerExtension(UserManagerByExtensionRequest userManagerByExtensionRequest)
         {
-            Log.Debug($"GetUserManagerExtension. {nameof(userManagerByExtensionRequest.TsId)}:{userManagerByExtensionRequest.TsId}, {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
+            _logger.LogDebug($"GetUserManagerExtension. {nameof(userManagerByExtensionRequest.TsId)}:{userManagerByExtensionRequest.TsId}, {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
 
             try
             {
-                using (var userChannel = CreateUserChannelClient())
+                using (var userChannel = CreateUserClient())
                 {
                     var result = userChannel.GetUserHelperExtensionBy(Username,
                                                                       Password,
@@ -893,10 +893,10 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"GetUserManagerExtension. {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
+                _logger.LogError(ex, $"GetUserManagerExtension. {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
             }
 
-            Log.Debug($"GetUserManagerExtension result is null. {nameof(userManagerByExtensionRequest.TsId)}:{userManagerByExtensionRequest.TsId}, {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
+            _logger.LogDebug($"GetUserManagerExtension result is null. {nameof(userManagerByExtensionRequest.TsId)}:{userManagerByExtensionRequest.TsId}, {nameof(userManagerByExtensionRequest.UserExtenstion)}:{userManagerByExtensionRequest.UserExtenstion}");
             return null;
         }
         public async Task<CustomerBalanceResponse> GetCustomerBalance(CustomerRequest customerRequest)
@@ -906,7 +906,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
                 Guid customerId;
                 if (Guid.TryParse(customerRequest.CustomerId, out customerId))
                 {
-                    using (var identityChannel = CreateIdentityChannelClient())
+                    using (var identityChannel = CreateIdentityClient())
                     {
                         var identityInfoResult = identityChannel.FindIdentityById(Username, Password, new Guid(customerRequest.CustomerId));
                         if (identityInfoResult.Success &&
@@ -921,15 +921,15 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in GetCustomerBalance. customerRequest: {@customerRequest}", customerRequest);
+                _logger.LogError(ex, "Error in GetCustomerBalance. customerRequest: {@customerRequest}", customerRequest);
             }
 
-            Log.Debug("GetCustomerBalance result is null. customerRequest:{@customerRequest}", customerRequest);
+            _logger.LogDebug("GetCustomerBalance result is null. customerRequest:{@customerRequest}", customerRequest);
             return null;
         }
         public async Task<CardtableResponse> GetCardtable(CardtableRequest cardtableRequest)
         {
-            Log.Debug($"GetCardtable. crmObjectTypeKey:{cardtableRequest.CrmObjectTypeKey}, identityId:{cardtableRequest.IdentityId}");
+            _logger.LogDebug($"GetCardtable. crmObjectTypeKey:{cardtableRequest.CrmObjectTypeKey}, identityId:{cardtableRequest.IdentityId}");
 
             try
             {
@@ -948,7 +948,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"GetCardtable, crmObjectTypeKey:{cardtableRequest.CrmObjectTypeKey}, identityId:{cardtableRequest.IdentityId}");
+                _logger.LogError(ex, $"GetCardtable, crmObjectTypeKey:{cardtableRequest.CrmObjectTypeKey}, identityId:{cardtableRequest.IdentityId}");
             }
 
             return null;
@@ -1029,7 +1029,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error in GetBillableObjectTypeProps. billableObjectTypeKey:{billableObjectTypePropsRequest.BillableObjectTypeKey}");
+                _logger.LogError(ex, $"Error in GetBillableObjectTypeProps. billableObjectTypeKey:{billableObjectTypePropsRequest.BillableObjectTypeKey}");
             }
 
             return new BillableObjectTypePropsResponse();
@@ -1043,7 +1043,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
                     var crmObjectTypeInfo = crmObjectType.GetCrmObjectTypeInfo(Username, Password, paymentInfoRequest.BillableObjectTypeKey);
                     if (crmObjectTypeInfo != null)
                     {
-                        Log.Debug("PayamgostarLookupSourceService GetPaymentInfo. CustomerRequest:{@CustomerRequest}, billableObjectTypeKey:{@billableObjectTypeKey}, billableObjectNumber:{@billableObjectNumber}, lookupNumberFieldKey:{@lookupNumberFieldKey}, valueFieldKey:{@valueFieldKey}, CrmObjectType:{@CrmObjectType}", paymentInfoRequest.CustomerRequest, paymentInfoRequest.BillableObjectTypeKey, paymentInfoRequest.BillableObjectNumber, paymentInfoRequest.LookupNumberFieldKey, paymentInfoRequest.ValueFieldKey, crmObjectTypeInfo.CrmObjectType);
+                        _logger.LogDebug("PayamgostarLookupSourceService GetPaymentInfo. CustomerRequest:{@CustomerRequest}, billableObjectTypeKey:{@billableObjectTypeKey}, billableObjectNumber:{@billableObjectNumber}, lookupNumberFieldKey:{@lookupNumberFieldKey}, valueFieldKey:{@valueFieldKey}, CrmObjectType:{@CrmObjectType}", paymentInfoRequest.CustomerRequest, paymentInfoRequest.BillableObjectTypeKey, paymentInfoRequest.BillableObjectNumber, paymentInfoRequest.LookupNumberFieldKey, paymentInfoRequest.ValueFieldKey, crmObjectTypeInfo.CrmObjectType);
 
                         switch (crmObjectTypeInfo.CrmObjectType)
                         {
@@ -1123,7 +1123,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error in GetPaymentInfo, billableObjectNumber:{paymentInfoRequest.BillableObjectNumber}, billableObjectTypeKey:{paymentInfoRequest.BillableObjectTypeKey}, lookupNumberFieldKey:{paymentInfoRequest.LookupNumberFieldKey}");
+                _logger.LogError(ex, $"Error in GetPaymentInfo, billableObjectNumber:{paymentInfoRequest.BillableObjectNumber}, billableObjectTypeKey:{paymentInfoRequest.BillableObjectTypeKey}, lookupNumberFieldKey:{paymentInfoRequest.LookupNumberFieldKey}");
             }
 
             return null;
@@ -1147,7 +1147,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
                 using (var epayChannel = CreateEpayClient())
                 {
                     var paymentLinkInfoResult = epayChannel.CreatePaymentLink(Username, Password, paymentLinkInfo);
-                    Log.Debug("SendPaymentLinkToUser, paymentLinkInfoResult:{@paymentLinkInfoResult}", paymentLinkInfoResult);
+                    _logger.LogDebug("SendPaymentLinkToUser, paymentLinkInfoResult:{@paymentLinkInfoResult}", paymentLinkInfoResult);
                     if (paymentLinkInfoResult.Success)
                     {
                         response.IsSuccess = true;
@@ -1164,7 +1164,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
             {
                 response.IsSuccess = false;
                 response.Message = ex.Message;
-                Log.Error(ex, "Error in SendPaymentLinkToUser. paymentInfo:{@paymentInfo}, mobileNumber:{@mobileNumber}, moneyAccountUserKey{@moneyAccountUserKey}", sendPaymentLinkToUserRequest.PaymentInfo, sendPaymentLinkToUserRequest.MobileNumber, sendPaymentLinkToUserRequest.MoneyAccountUserKey);
+                _logger.LogError(ex, "Error in SendPaymentLinkToUser. paymentInfo:{@paymentInfo}, mobileNumber:{@mobileNumber}, moneyAccountUserKey{@moneyAccountUserKey}", sendPaymentLinkToUserRequest.PaymentInfo, sendPaymentLinkToUserRequest.MobileNumber, sendPaymentLinkToUserRequest.MoneyAccountUserKey);
             }
             response.IsSuccess = false;
             return await Task.FromResult(response);

@@ -1,12 +1,12 @@
-﻿using AloVoIP.OpenCRM.Enums;
-using AloVoIP.OpenCRM.Requests;
+﻿using AloVoIP.OpenCRM.Requests;
 using AloVoIP.OpenCRM.Responses;
+using Microsoft.Extensions.Logging;
 using PayamGostarClient;
 using PayamGostarClient.TelephonySystem;
-using Serilog;
+using SeptaKit.TelephonyServer.Enums;
 using System;
 using System.Threading.Tasks;
-using ChannelResponse = AloVoIP.OpenCRM.Enums.ChannelResponse;
+using ChannelResponse = SeptaKit.TelephonyServer.Enums.ChannelResponse;
 
 namespace AloVoIP.OpenCRM.PayamGostar
 {
@@ -14,18 +14,20 @@ namespace AloVoIP.OpenCRM.PayamGostar
     {
         private IPgClient _pgClient;
         private DateTime _nextClientCreateDate;
+        protected readonly ILogger _logger;
 
         public virtual string CallStoreId { get; }
         protected string Host { get; }
         protected string Username { get; }
         protected string Password { get; }
 
-        public PayamGostarCallStoreService(string callStoreId, string host, string username, string password)
+        public PayamGostarCallStoreService(string callStoreId, string host, string username, string password, ILoggerFactory loggerFactory)
         {
             CallStoreId = callStoreId;
             Host = host;
             Username = username;
             Password = password;
+            _logger = loggerFactory.CreateLogger(this.GetType().Name);
         }
         protected IPgClient MyIPgClient
         {
@@ -118,8 +120,7 @@ namespace AloVoIP.OpenCRM.PayamGostar
                 case ChannelState.Hangedup:
                     return ChannelStatus.HangUp;
                 default:
-                    Log.Error($"Error in converting channelStatus to PayamGostarChannelStatus: {nameof(channelState)}:{channelState}");
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException($"Error in converting channelStatus to PayamGostarChannelStatus: {nameof(channelState)}:{channelState}");
             }
         }
 
